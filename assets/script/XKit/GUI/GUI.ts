@@ -78,11 +78,14 @@ export class GUI {
         // 2. 加载资源 (优先从缓存获取)
         let prefab = this._prefabCache.get(path);
         if (!prefab) {
-            try {
-                prefab = await this._loadResource<Prefab>(path, bundleName);
+            prefab = await this._loadResource<Prefab>(path, bundleName);
+            if(prefab)
+            {
                 this._prefabCache.set(path, prefab);
-            } catch (e) {
-                error(`Failed to load UI: ${path}`, e);
+            }
+            else
+            {
+                error(`Failed to load UI: ${path}`);
                 return null;
             }
         }
