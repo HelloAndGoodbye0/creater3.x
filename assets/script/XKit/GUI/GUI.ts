@@ -4,16 +4,12 @@ import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
 import { UIConfig, UIConfigData, UIID } from './UIConfig';
 import { XKit } from '../XKit';
+import { UIToast } from '../../../script/view/toast/UIToast';
 
 const { ccclass } = _decorator;
 
 @ccclass('GUI')
 export class GUI {
-    // private static _instance: GUI = null;
-    // public static get instance(): GUI {
-    //     if (!this._instance) this._instance = new GUI();
-    //     return this._instance;
-    // }
 
     // 存储层级节点的 Map
     private _layerMap: Map<UILayer, Node> = new Map();
@@ -82,7 +78,7 @@ export class GUI {
         let prefab = this._prefabCache.get(path);
         if (!prefab) {
             try {
-                prefab = await this._loadResource(path, bundleName);
+                prefab = await this._loadResource<Prefab>(path, bundleName);
                 this._prefabCache.set(path, prefab);
             } catch (e) {
                 error(`Failed to load UI: ${path}`, e);
@@ -166,14 +162,26 @@ export class GUI {
 
             if (bundleName == "resources") {
                 resources.load(path, Prefab, (err, asset) => {
-                    if (err) reject(err);
-                    else resolve(asset as any);
+                    if (err)
+                    {
+                        resolve(null);
+                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
+                    }
+                    else{
+                        resolve(asset as any);
+                    }
                 });
             }
             else{
                 XKit.res.load(bundleName,path,Prefab,(err,asset)=>{
-                    if(err) reject(err);
-                    else resolve(asset as any);
+                    if (err)
+                    {
+                        resolve(null);
+                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
+                    }
+                    else{
+                        resolve(asset as any);
+                    }
                 })
             }
         });
@@ -187,6 +195,20 @@ export class GUI {
      * @example 
      * oops.gui.toast("提示内容");
      */
-    toast(content: string, useI18n: boolean = false) {
+    async toast(content: string) {
+        let config = UIConfigData[UIID.Toast]
+        let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
+        if(prefab)
+        {
+            let node = instantiate(prefab)
+            let layer = this._layerMap.get(config.layer)
+            if(layer)
+            {
+                layer.addChild(node)
+            }
+            let toastComp = node.getComponent(UIToast)
+            toastComp.refresh(content)
+        }
+
     }
 }

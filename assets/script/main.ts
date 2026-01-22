@@ -91,6 +91,8 @@ export class main extends Component {
     // }
     eventTest(data) {
         console.log("EventTest", data)
+
+        XKit.gui.toast("收到事件回调：" + data.name)
     }
     onDestroy() {
         EventManager.off(ConstEventDefine.TEST, this.eventTest, this)

@@ -5,6 +5,8 @@ import { UILayer } from "./UILayer";
 export enum UIID {
 
     Waiting = 0,//菊花转
+
+    Toast = 1,//toast
 }
 
 
@@ -26,6 +28,9 @@ export interface UIConfig {
 /** 打开界面方式的配置数据 */
 export var UIConfigData: { [key: number]: UIConfig } = {
 
+    //菊花转
     [UIID.Waiting]: { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" },
+    //toast
+    [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources" },
 
 }
