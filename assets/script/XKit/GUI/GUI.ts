@@ -20,6 +20,12 @@ export class GUI {
     private _prefabCache: Map<string, Prefab> = new Map();
 
     private _root: Node = null;
+    /**
+     * UI 对象池 <路径, UIBase组件数组>
+     */
+    protected uiPool:Map<string,UIBase[]> = new Map()
+    // 同一种类 UI 池的最大数量
+    protected poolSize:number = 8
 
     /**
      * 初始化 UI 根节点和层级
@@ -192,33 +198,73 @@ export class GUI {
     }
 
 
-        /**
+    /**
      * 渐隐飘过提示
      * @param content 文本表示
      * @param useI18n 是否使用多语言
-     * @example 
      */
     async toast(content: string) {
         let config = UIConfigData[UIID.Toast]
-        let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
-        if(prefab)
+        let pool = this.getPoolByPath(config.prefab)
+        let toastComp:UIToast = pool?.pop() as UIToast
+        if(!toastComp)
         {
-            let node = instantiate(prefab)
-            let layer = this._layerMap.get(config.layer)
-            if(layer)
+            let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
+            if(prefab)
             {
-                layer.addChild(node)
-                let toastComp = node.getComponent(UIToast)
-                toastComp?.refresh(content)
+                let node = instantiate(prefab)
+                let layer = this._layerMap.get(config.layer)
+                if(layer)
+                {
+                    layer.addChild(node)
+                    toastComp = node.getComponent(UIToast)
+                    toastComp._url = config.prefab
+                }
+                else
+                {
+                    XKit.log.logBusiness("no find toast layer")
+                }
             }
-            else
-            {
-                XKit.log.logBusiness("no find toast layer")
-            }
-
         }
+        toastComp?.show()
+        toastComp?.refresh(content,(comp:UIToast)=>{
+            this.recycleToPool(comp)
+        })
+        
+    }
+    /**
+     * 从对象池获取UI组件
+     * @param path 
+     * @returns 
+     */
+    protected getPoolByPath(path:string):UIBase[]
+    {
+        return this.uiPool.get(path) || []
     }
 
+    /**
+     * 回收UI组件到对象池
+     * @param comp 
+     */
+    protected recycleToPool(comp:UIBase){
+        console.log("recycle to pool:",comp._url)
+        let arr = this.uiPool.get(comp._url)
+        if(!arr){
+            arr = []
+            arr.push(comp)
+        }
+        else{
+            if(arr.length >= this.poolSize){
+                //超出池子大小，直接销毁
+                comp.node.destroy()
+                return
+            }else{
+                arr.push(comp)
+            }
+        }
+        this.uiPool.set(comp._url,arr)
+
+    }
     /**
      * 显示消息弹窗
      * @param title 
@@ -228,23 +274,32 @@ export class GUI {
      */
     async showMsgBox(title: string, content: string, left: MsgBoxDataOptions, right?: MsgBoxDataOptions) { 
         let config = UIConfigData[UIID.MsgBox]
-        let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
-        if(prefab)
+        let pool = this.getPoolByPath(config.prefab)
+        let msgBoxComp:UIMsgBox = pool?.pop() as UIMsgBox
+        if(!msgBoxComp)
         {
-            let node = instantiate(prefab)
-            let layer = this._layerMap.get(config.layer)
-            if(layer)
+            let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
+            if(prefab)
             {
-                layer.addChild(node)
-                let msgBoxComp = node.getComponent(UIMsgBox)
-                msgBoxComp?.refresh(title, content, left, right)
-                msgBoxComp?.show()
+                let node = instantiate(prefab)
+                let layer = this._layerMap.get(config.layer)
+                if(layer)
+                {
+                    layer.addChild(node)
+                    msgBoxComp = node.getComponent(UIMsgBox)
+                    msgBoxComp._url = config.prefab
+                }
+                else
+                {
+                    XKit.log.logBusiness("no find msgBox layer")
+                }
             }
-            else
-            {
-                XKit.log.logBusiness("no find msgBox layer")
-            }
-        
         }
+        msgBoxComp?.refresh(title, content, left, right)
+        msgBoxComp?.show()
+        msgBoxComp?.setCloseHandler((box:UIMsgBox)=>{
+            this.recycleToPool(box)
+        })
+        
     }
 }

@@ -44,7 +44,10 @@ export class UIMsgBox extends UIBase {
      */
     private rightClickHandler:Function
 
-
+    /**
+     * 关闭委托
+     */
+    protected _closeHandler:(box:UIMsgBox)=>void = null
 
 
     start(  )
@@ -79,7 +82,8 @@ export class UIMsgBox extends UIBase {
     }
 
     protected onClose(): void {
-        this.node.destroy()
+        this._closeHandler?.( this )
+        this._closeHandler = null
     }
 
     private setBtnInteractable(bActive:boolean)
@@ -88,7 +92,14 @@ export class UIMsgBox extends UIBase {
         this.btnRight.interactable = bActive
     }
     
-
+    /**
+     * 设置关闭回调
+     * @param handler 
+     */
+    setCloseHandler( handler:(box:UIMsgBox)=>void  )
+    {
+        this._closeHandler = handler
+    }
     /**
      * 显示提示框
      * @param title 标题
