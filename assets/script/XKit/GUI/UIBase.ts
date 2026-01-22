@@ -2,7 +2,8 @@
 import { _decorator, assetManager, Component, Enum, Animation } from 'cc';
 import { XKit } from '../XKit';
 import { EDITOR } from 'cc/env';
-import { utils } from '../utils';
+import { ListenerFunc } from '../event/EventMessage';
+import { utils } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
 
@@ -88,8 +89,8 @@ export abstract class UIBase extends Component {
 
         if (this.popType != popType.NONE && EDITOR) {
             var popData = AnimationConfig[this.popType]
-            var show_ani = `db://assets/resources/common/anim/${popData.show}.anim`
-            var hide_ani = `db://assets/resources/common/anim/${popData.hide}.anim`
+            var show_ani = `db://assets/resources/animations/${popData.show}.anim`
+            var hide_ani = `db://assets/resources/animations/${popData.hide}.anim`
             const uuid_show = await Editor.Message.request("asset-db", "query-uuid", show_ani);
             const uuid_hide = await Editor.Message.request("asset-db", "query-uuid", hide_ani);
             // console.log(uuid_show, uuid_hide)
@@ -114,7 +115,7 @@ export abstract class UIBase extends Component {
      * 页面刷新
      * @param arg 依赖参数
      */
-    refresh( arg?:any ){}
+    refresh( ...args:any ){}
 
     /**
      * 打开页面
@@ -184,4 +185,25 @@ export abstract class UIBase extends Component {
         this.node.active = b
     }
  
+
+    //# region 事件监听
+     on(name:string,callback:ListenerFunc,target:any)
+     {
+        XKit.message.on(name,callback,target)
+     }
+
+     once(name:string,callback:ListenerFunc,target:any)
+     {
+        XKit.message.once(name,callback,target)
+     }
+     off(name:string,callback:ListenerFunc,target:any)
+     {
+        XKit.message.off(name,callback,target)
+     }
+
+     emit(name:string,...args:any)
+     {
+        XKit.message.dispatchEvent(name,...args)
+     }
+    //# endregion
 }

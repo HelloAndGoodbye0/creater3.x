@@ -1,23 +1,31 @@
 
 
-import { _decorator, Component, Label, CCInteger, Node, UITransform, director } from 'cc';
+import { _decorator, Component, Label, CCInteger, Node, UITransform, director, Button } from 'cc';
 import { tutorial } from 'pb_framework';
 const { ccclass, property } = _decorator;
-import ConstEventDefine from './config/ConstEventDefine';
-import EventManager from './core/EventManager';
-import UITool from './core/UITool';
+import {ConstEventDefine} from './config/ConstEventDefine';
 import { XKit } from './XKit/XKit';
 import { GUI } from './XKit/GUI/GUI';
 import { UIID } from './XKit/GUI/UIConfig';
 import { UIWaiting } from './view/wait/UIWaiting';
 import { AudioManager } from './XKit/audio/AudioManager';
+import { UIBase } from './XKit/GUI/UIBase';
+import { utils } from './XKit/utils/utils';
 
 
 
 
 @ccclass('main')
-export class main extends Component {
-    mChild: any = {};
+export class main extends UIBase {
+
+    @property(Button)
+    btn_load: Button = null;
+
+    @property(Button)
+    btn_event: Button = null;
+
+    @property(Button)
+    btn_alert: Button = null;
 
 
     onLoad() {
@@ -31,9 +39,7 @@ export class main extends Component {
         XKit.gui = new GUI()
         XKit.gui.init(this.node)
 
-        this.mChild = {}
-        UITool.getChildNode(this.mChild, this.node)
-        // this.showGuide(this.mChild.alert)
+
     }
     showGuide(target: Node) {
         // var lcoal_pos = convert2NodePos(this.mask, this.mChild.alert)
@@ -42,31 +48,31 @@ export class main extends Component {
     }
     start() {
 
-
-        UITool.addBtnClick(this.mChild.Button, async() => {
-            console.log('click')
-            // UITool.showWaitNetWork()
-            // setTimeout(() => {
-            //     UITool.dismissWaitNetWork()
-            // }, 3000)
-           let waiting:UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
+        utils.ButtonBindClick(this.btn_load,async ()=>{
+            let waiting:UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
             setTimeout(() => {
                 XKit.gui.close(UIID.Waiting)
             }, 3000)
         })
+        
 
-        UITool.addBtnClick(this.mChild.event, () => {
-            EventManager.dispatchEvent(ConstEventDefine.TEST, { "name": "Lee123" })
+        utils.ButtonBindClick(this.btn_event,()=>{
+            this.emit(ConstEventDefine.TEST, { "name": "Lee123" })
         })
 
-        UITool.addBtnClick(this.mChild.alert, () => {
-            UITool.showAlert("66666", ["yes", "no"], (index) => {
-                console.log("index:", index)
-            })
+        utils.ButtonBindClick(this.btn_alert,()=>{
+            
+            XKit.gui.showMsgBox("提示", "这是一个测试", { txt: "确定", click: () =>{
+                XKit.log.logBusiness("点击确定")
+            }}, { txt: "取消" ,click: () =>{
+                XKit.log.logBusiness("点击取消")
+            }})
+
         })
 
-        EventManager.on(ConstEventDefine.TEST, this.eventTest, this)
 
+
+        this.on(ConstEventDefine.TEST, this.eventTest, this)
         //pb Test
         var peron2 = tutorial.Person.create()
         peron2.name = "hello world"
@@ -78,24 +84,17 @@ export class main extends Component {
         var decodeData = tutorial.Person.decode(byteData)
         console.log("解码测试===========", JSON.stringify(decodeData))
 
-        // var res = protoTool.encode(CMD.Login, { name: "hello world", email: "497232807@qq.com", id: 201162 })
-        // console.log("ProtoTool 编码==", res)
 
-        // var res1 = protoTool.decode(CMD.Login, res)
-        // console.log("ProtoTool 解码==", JSON.stringify(res1))
 
     }
 
-    // update (deltaTime: number) {
-    //     // [4]
-    // }
-    eventTest(data) {
-        console.log("EventTest", data)
 
+    eventTest(name,data) {
+        console.log("EventTest", data)
         XKit.gui.toast("收到事件回调：" + data.name)
     }
     onDestroy() {
-        EventManager.off(ConstEventDefine.TEST, this.eventTest, this)
+        // EventManager.off(ConstEventDefine.TEST, this.eventTest, this)
     }
 
 }

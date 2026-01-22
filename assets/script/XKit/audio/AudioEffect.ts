@@ -4,7 +4,7 @@
  * @LastEditors: Lee 497232807@qq.com
  * @LastEditTime: 2023-05-10 15:57:21
  */
-import { AudioClip, AudioSource, error, _decorator } from 'cc';
+import { AudioClip, AudioSource, error, _decorator, warn } from 'cc';
 import { XKit } from '../XKit';
 
 const { ccclass, menu } = _decorator;
@@ -29,7 +29,7 @@ export class AudioEffect extends AudioSource {
     load(url: string, bundleName:string, onAudioEndCall?: Function, bLoop:boolean = false) {
         XKit.res.load(bundleName,url, AudioClip, (err: Error | null, clip: AudioClip) => {
             if (err != null) {
-                error(err)
+                warn(err.message)
                 return
             }
 

@@ -1,4 +1,3 @@
-import { utils } from '../../../script/XKit/utils';
 import { UIBase } from '../../../script/XKit/GUI/UIBase';
 import { _decorator, Animation, Label, Node } from 'cc';
 const { ccclass, property } = _decorator;

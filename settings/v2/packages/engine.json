@@ -158,10 +158,10 @@
         "_value": false
       },
       "marionette": {
-        "_value": false
+        "_value": true
       },
       "procedural-animation": {
-        "_value": false
+        "_value": true
       },
       "custom-pipeline-post-process": {
         "_value": false
@@ -189,11 +189,13 @@
       "gfx-webgl",
       "intersection-2d",
       "legacy-pipeline",
+      "marionette",
       "meshopt",
       "particle",
       "physics-2d-box2d",
       "physics-ammo",
       "primitive",
+      "procedural-animation",
       "tween",
       "ui",
       "vendor-google",

@@ -5,6 +5,7 @@ import { UILayer } from './UILayer';
 import { UIConfig, UIConfigData, UIID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
+import { UIMsgBox, MsgBoxDataOptions } from '../../../script/view/msgBox/UIMsgBox';
 
 const { ccclass } = _decorator;
 
@@ -214,6 +215,27 @@ export class GUI {
             }
 
         }
+    }
 
+    async showMsgBox(title: string, content: string, left: MsgBoxDataOptions, right?: MsgBoxDataOptions) { 
+        let config = UIConfigData[UIID.MsgBox]
+        let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
+        if(prefab)
+        {
+            let node = instantiate(prefab)
+            let layer = this._layerMap.get(config.layer)
+            if(layer)
+            {
+                layer.addChild(node)
+                let msgBoxComp = node.getComponent(UIMsgBox)
+                msgBoxComp?.refresh(title, content, left, right)
+                msgBoxComp?.show()
+            }
+            else
+            {
+                XKit.log.logBusiness("no find msgBox layer")
+            }
+        
+        }
     }
 }

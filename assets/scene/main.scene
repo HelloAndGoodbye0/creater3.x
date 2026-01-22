@@ -11,7 +11,7 @@
   },
   {
     "__type__": "cc.Scene",
-    "_name": "Test",
+    "_name": "main",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -1472,6 +1472,17 @@
     },
     "_enabled": true,
     "__prefab": null,
+    "popType": 0,
+    "animation": null,
+    "btn_load": {
+      "__id__": 15
+    },
+    "btn_event": {
+      "__id__": 23
+    },
+    "btn_alert": {
+      "__id__": 31
+    },
     "_id": "af0YdN/H5OHJuhEe+s1l7b"
   },
   {

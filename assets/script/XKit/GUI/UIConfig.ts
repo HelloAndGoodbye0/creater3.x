@@ -7,6 +7,8 @@ export enum UIID {
     Waiting = 0,//菊花转
 
     Toast = 1,//toast
+
+    MsgBox=2,//消息框
 }
 
 
@@ -32,5 +34,6 @@ export var UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Waiting]: { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" },
     //toast
     [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources" },
-
+    //消息框
+    [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources" },
 }

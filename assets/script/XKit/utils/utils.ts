@@ -2,7 +2,7 @@ import { screen, Node, Animation, sp, tween, TweenEasing, Tween, Button, Toggle,
 import { SpriteFrame,view,sys,Size,ResolutionPolicy,macro,native,__private,Component,ImageAsset,Label,Mat4,AudioClip,Vec2 } from "cc";
 import { Texture2D,EventTouch,Quat,assetManager } from "cc";
 import { DEBUG, HTML5, NATIVE } from "cc/env";
-import { XKit } from './XKit';
+import { XKit } from '../XKit';
 
 
 /**
