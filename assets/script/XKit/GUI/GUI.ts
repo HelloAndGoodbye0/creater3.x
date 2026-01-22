@@ -205,9 +205,14 @@ export class GUI {
             if(layer)
             {
                 layer.addChild(node)
+                let toastComp = node.getComponent(UIToast)
+                toastComp?.refresh(content)
             }
-            let toastComp = node.getComponent(UIToast)
-            toastComp.refresh(content)
+            else
+            {
+                XKit.log.logBusiness("no find toast layer")
+            }
+
         }
 
     }
