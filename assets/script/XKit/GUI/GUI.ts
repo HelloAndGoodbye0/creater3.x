@@ -123,7 +123,7 @@ export class GUI {
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
     public close(path: string, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
-    public close(path: number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
+    public close(id: number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
     public close(path: string|number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void {
         bDestory = bDestory || false;
         bSkipAnim = bSkipAnim || false;
@@ -194,7 +194,6 @@ export class GUI {
      * @param content 文本表示
      * @param useI18n 是否使用多语言
      * @example 
-     * oops.gui.toast("提示内容");
      */
     async toast(content: string) {
         let config = UIConfigData[UIID.Toast]
@@ -217,6 +216,13 @@ export class GUI {
         }
     }
 
+    /**
+     * 显示消息弹窗
+     * @param title 
+     * @param content 
+     * @param left 
+     * @param right 
+     */
     async showMsgBox(title: string, content: string, left: MsgBoxDataOptions, right?: MsgBoxDataOptions) { 
         let config = UIConfigData[UIID.MsgBox]
         let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
