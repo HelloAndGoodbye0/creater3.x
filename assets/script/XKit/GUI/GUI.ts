@@ -72,8 +72,10 @@ export class GUI {
         let bundleName = data.bundle
         // 1. 检查是否已经打开
         if (this._uiMap.has(path)) {
-            warn(`UI ${path} is already opened.`);
-            return this._uiMap.get(path) as T;
+            let comp = this._uiMap.get(path)
+            comp.show()
+            comp.refresh(args)
+            return comp as T;
         }
 
         // 2. 加载资源 (优先从缓存获取)
@@ -123,9 +125,11 @@ export class GUI {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: string, bDestory: boolean,bSkipAnim:boolean, callback?:Function): void;
-    public close(path: number): void;
-    public close(path: string|number, bDestory: boolean = false,bSkipAnim:boolean = false, callback?:Function): void {
+    public close(path: string, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
+    public close(path: number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
+    public close(path: string|number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void {
+        bDestory = bDestory || false;
+        bSkipAnim = bSkipAnim || false;
         if(typeof path === "number")
         {
             const config = UIConfigData[path];
@@ -134,7 +138,7 @@ export class GUI {
         }
         const comp = this._uiMap.get(path);
         if (comp) {
-            comp.close(bDestory,()=>{
+            comp.close(()=>{
                 callback?.()
                 if(bDestory)
                 {

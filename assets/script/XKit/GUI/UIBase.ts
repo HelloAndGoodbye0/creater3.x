@@ -145,7 +145,7 @@ export abstract class UIBase extends Component {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    close(bDestory: boolean = false, callback?:Function,bSkipAnim:boolean = false )
+    close(callback?:Function,bSkipAnim:boolean = false )
     {
         //如果正在关闭，则不重复执行
         if(this.bClosing) return
@@ -153,6 +153,7 @@ export abstract class UIBase extends Component {
         let closeAction = ()=>{
             this.onClose()
             this.setVisible(false)
+            this.bClosing = false
             callback?.()
         }
 

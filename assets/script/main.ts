@@ -51,7 +51,7 @@ export class main extends Component {
             // }, 3000)
            let waiting:UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
             setTimeout(() => {
-                waiting.close()
+                XKit.gui.close(UIID.Waiting)
             }, 3000)
         })
 
