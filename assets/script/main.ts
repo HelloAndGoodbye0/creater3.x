@@ -1,29 +1,36 @@
-/*
- * @Descripttion: 
- * @version: 
- * @Author: liqiang
- * @email: 497232807@qq.com
- * @Date: 2022-02-10 12:08:09
- * @LastEditTime: 2023-07-05 16:46:37
- */
 
-import { _decorator, Component, Label, CCInteger, Node, UITransform } from 'cc';
+
+import { _decorator, Component, Label, CCInteger, Node, UITransform, director } from 'cc';
 import { tutorial } from 'pb_framework';
 const { ccclass, property } = _decorator;
 import ConstEventDefine from './config/ConstEventDefine';
 import EventManager from './core/EventManager';
 import UITool from './core/UITool';
-import { convert2NodePos } from './core/utils';
-import { CMD } from './pb/cmdDef';
-import {ProtoTool} from './pb/protoTool';
+import { XKit } from './XKit/XKit';
+import { GUI } from './XKit/GUI/GUI';
+import { UIID } from './XKit/GUI/UIConfig';
+import { UIWaiting } from './view/wait/UIWaiting';
+import { AudioManager } from './XKit/audio/AudioManager';
 
 
-@ccclass('loadscene')
-export class loadscene extends Component {
+
+
+@ccclass('main')
+export class main extends Component {
     mChild: any = {};
 
 
     onLoad() {
+
+        let persistRootNode = new Node("PersistRootNode");
+        director.addPersistRootNode(persistRootNode);
+        // 创建音频模块
+        XKit.audio = persistRootNode.addComponent(AudioManager);
+        XKit.audio.load();
+        // 初始化GUI
+        XKit.gui = new GUI()
+        XKit.gui.init(this.node)
+
         this.mChild = {}
         UITool.getChildNode(this.mChild, this.node)
         // this.showGuide(this.mChild.alert)
@@ -35,12 +42,16 @@ export class loadscene extends Component {
     }
     start() {
 
-        // console.log(this.mChild.Button)
-        UITool.addBtnClick(this.mChild.Button, () => {
+
+        UITool.addBtnClick(this.mChild.Button, async() => {
             console.log('click')
-            UITool.showWaitNetWork()
+            // UITool.showWaitNetWork()
+            // setTimeout(() => {
+            //     UITool.dismissWaitNetWork()
+            // }, 3000)
+           let waiting:UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
             setTimeout(() => {
-                UITool.dismissWaitNetWork()
+                waiting.close()
             }, 3000)
         })
 
