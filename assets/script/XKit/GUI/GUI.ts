@@ -123,9 +123,15 @@ export class GUI {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: number);
-    public close(path: string, bDestory: boolean,bSkipAnim:boolean, callback?:Function);
-    public close(path: string, id:number,bDestory: boolean = false,bSkipAnim:boolean = false, callback?:Function): void {
+    public close(path: string, bDestory: boolean,bSkipAnim:boolean, callback?:Function): void;
+    public close(path: number): void;
+    public close(path: string|number, bDestory: boolean = false,bSkipAnim:boolean = false, callback?:Function): void {
+        if(typeof path === "number")
+        {
+            const config = UIConfigData[path];
+            if (!config) return;
+            path = config.prefab;
+        }
         const comp = this._uiMap.get(path);
         if (comp) {
             comp.close(bDestory,()=>{
