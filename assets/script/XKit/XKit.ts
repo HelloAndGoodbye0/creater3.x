@@ -1,5 +1,5 @@
 import { AudioManager } from "./audio/AudioManager";
-import { MessageManager } from "./event/MessageManager";
+import { EventManager } from "./event/EventManager";
 import { GUI } from "./GUI/GUI";
 import { Logger } from "./log/Logger";
 import { ResLoader } from "./res/ResLoader";
@@ -20,5 +20,5 @@ export  class XKit {
     /** 本地存储 */
     static storage: StorageManager = new StorageManager();
     /** 全局消息 */
-    static message: MessageManager = MessageManager.Instance;
+    static message: EventManager = EventManager.instance
 }

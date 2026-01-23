@@ -89,7 +89,7 @@ export class main extends UIBase {
     }
 
 
-    eventTest(name,data) {
+    eventTest(data) {
         console.log("EventTest", data)
         XKit.gui.toast("收到事件回调：" + data.name)
     }

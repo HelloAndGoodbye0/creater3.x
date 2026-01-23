@@ -203,7 +203,7 @@ export abstract class UIBase extends Component {
 
      emit(name:string,...args:any)
      {
-        XKit.message.dispatchEvent(name,...args)
+        XKit.message.emit(name,...args)
      }
     //# endregion
 }
