@@ -121,7 +121,7 @@ export class PopupManager {
         try {
             // 检查条件
             if (config?.condition && !config.condition()) {
-        
+                return 
             }
 
             // 打开弹框
