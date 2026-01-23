@@ -78,8 +78,9 @@ export class GUI {
      * @param comp 
      */
     protected recycleToPool(comp: UIBase) {
-        console.log("recycle to pool:", comp._url)
-        let arr = this.uiPool.get(comp._url)
+        // console.log("recycle to pool:", comp._url)
+        let key = comp._usePool? comp._url.split("_")[0]: comp._url
+        let arr = this.uiPool.get(key)
         if (!arr) {
             arr = []
             arr.push(comp)
@@ -93,7 +94,7 @@ export class GUI {
                 arr.push(comp)
             }
         }
-        this.uiPool.set(comp._url, arr)
+        this.uiPool.set(key, arr)
 
     }
 
@@ -159,18 +160,13 @@ export class GUI {
             let pool = this.getPoolByPath(path)
             let comp = pool?.pop() as T
             if (comp) {
-                // 从池中获取的组件，需要重新激活和设置参数
-                comp.node.active = true
-                comp.refresh(args)
                 comp.show()
+                comp.refresh(args)
+                //使用缓存池设置唯一的key
+                let uniqueKey = `${path}_${Date.now()}`
+                comp._url = uniqueKey
+                this._uiMap.set( uniqueKey, comp );
 
-                // 添加到指定层级
-                const layerNode = this._layerMap.get(layer);
-                if (layerNode) {
-                    layerNode.addChild(comp.node);
-                } else {
-                    this._root.addChild(comp.node);
-                }
                 return comp;
             }
         }
@@ -197,10 +193,12 @@ export class GUI {
             return null;
         }
 
-        // 5. 设置基础属性
-        comp._url = path;
+        // 5. 使用缓存池设置唯一的key
+        let uniqueKey = usePool ? `${path}_${Date.now()}`: path;
+        comp._url = uniqueKey
         comp._usePool = usePool;
-
+        this._uiMap.set(uniqueKey, comp);
+      
 
         // 6. 添加到指定层级
         const layerNode = this._layerMap.get(layer);
@@ -210,8 +208,7 @@ export class GUI {
             this._root.addChild(node); // 降级处理
         }
 
-        // 7. 记录并调用生命周期
-        this._uiMap.set(path, comp);
+        // 7.显示刷新
         comp.show()
         comp.refresh(args)
         return comp as T;
@@ -231,7 +228,6 @@ export class GUI {
         bSkipAnim = bSkipAnim || false;
         if (typeof path === "number") {
             const config = UIConfigData[path];
-            if (!config) return;
             path = config.prefab;
         }
         const comp = this._uiMap.get(path);

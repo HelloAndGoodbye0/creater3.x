@@ -1,3 +1,4 @@
+import { XKit } from "../../../script/XKit/XKit";
 import { UIBase } from "../../../script/XKit/GUI/UIBase"
 import { utils } from "../../../script/XKit/utils/utils";
 import { _decorator, Label, Button } from 'cc';
@@ -77,7 +78,7 @@ export class UIMsgBox extends UIBase {
     private onClickBtn( bLeft:boolean = true )
     {
         this.setBtnInteractable( false )
-        this.close()
+        XKit.gui.close( this._url )
         if(bLeft)
         {
             this.leftClickHandler?.()
