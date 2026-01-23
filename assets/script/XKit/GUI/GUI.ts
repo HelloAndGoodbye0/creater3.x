@@ -23,9 +23,81 @@ export class GUI {
     /**
      * UI 对象池 <路径, UIBase组件数组>
      */
-    protected uiPool:Map<string,UIBase[]> = new Map()
+    protected uiPool: Map<string, UIBase[]> = new Map()
     // 同一种类 UI 池的最大数量
-    protected poolSize:number = 8
+    protected poolSize: number = 8
+
+
+
+
+
+    /**
+     * 内部加载器封装
+     */
+    private _loadResource<T>(path: string, bundleName: string): Promise<T> {
+        return new Promise((resolve, reject) => {
+
+            if (bundleName == "resources") {
+                resources.load(path, Prefab, (err, asset) => {
+                    if (err) {
+                        resolve(null);
+                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
+                    }
+                    else {
+                        resolve(asset as any);
+                    }
+                });
+            }
+            else {
+                XKit.res.load(bundleName, path, Prefab, (err, asset) => {
+                    if (err) {
+                        resolve(null);
+                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
+                    }
+                    else {
+                        resolve(asset as any);
+                    }
+                })
+            }
+        });
+    }
+
+
+
+    /**
+     * 从对象池获取UI组件
+     * @param path 
+     * @returns 
+     */
+    protected getPoolByPath(path: string): UIBase[] {
+        return this.uiPool.get(path) || []
+    }
+
+    /**
+     * 回收UI组件到对象池
+     * @param comp 
+     */
+    protected recycleToPool(comp: UIBase) {
+        console.log("recycle to pool:", comp._url)
+        let arr = this.uiPool.get(comp._url)
+        if (!arr) {
+            arr = []
+            arr.push(comp)
+        }
+        else {
+            if (arr.length >= this.poolSize) {
+                //超出池子大小，直接销毁
+                comp.node.destroy()
+                return
+            } else {
+                arr.push(comp)
+            }
+        }
+        this.uiPool.set(comp._url, arr)
+
+    }
+
+    //#region 外部调用
 
     /**
      * 初始化 UI 根节点和层级
@@ -63,10 +135,9 @@ export class GUI {
      */
     public async open<T extends UIBase>(data: UIID): Promise<T | null>;
     public async open<T extends UIBase>(data: UIConfig): Promise<T | null>
-    public async open<T extends UIBase>(data: UIConfig|UIID): Promise<T | null> {
+    public async open<T extends UIBase>(data: UIConfig | UIID): Promise<T | null> {
 
-        if(typeof data === "number")
-        {
+        if (typeof data === "number") {
             data = UIConfigData[data]
         }
         let path = data.prefab
@@ -108,12 +179,10 @@ export class GUI {
         let prefab = this._prefabCache.get(path);
         if (!prefab) {
             prefab = await this._loadResource<Prefab>(path, bundleName);
-            if(prefab)
-            {
+            if (prefab) {
                 this._prefabCache.set(path, prefab);
             }
-            else
-            {
+            else {
                 error(`Failed to load UI: ${path}`);
                 return null;
             }
@@ -131,7 +200,7 @@ export class GUI {
         // 5. 设置基础属性
         comp._url = path;
         comp._usePool = usePool;
-        
+
 
         // 6. 添加到指定层级
         const layerNode = this._layerMap.get(layer);
@@ -155,78 +224,47 @@ export class GUI {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: string, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
-    public close(id: number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void;
-    public close(path: string|number, bDestory?: boolean,bSkipAnim?:boolean, callback?:Function): void {
+    public close(path: string, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void;
+    public close(id: number, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void;
+    public close(path: string | number, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void {
         bDestory = bDestory || false;
         bSkipAnim = bSkipAnim || false;
-        if(typeof path === "number")
-        {
+        if (typeof path === "number") {
             const config = UIConfigData[path];
             if (!config) return;
             path = config.prefab;
         }
         const comp = this._uiMap.get(path);
         if (comp) {
-            comp.close(()=>{
+            comp.close(() => {
                 callback?.()
                 // 从已打开UI中移除
                 this._uiMap.delete(path);
-                
-                if(comp._usePool && !bDestory)
-                {
+
+                if (comp._usePool && !bDestory) {
                     // 使用对象池且不强制销毁，回收到池中
                     this.recycleToPool(comp);
                 }
-                else if(bDestory)
-                {
+                else if (bDestory) {
                     // 强制销毁
                     comp.node.destroy();
                 }
-            },bSkipAnim)
+            }, bSkipAnim)
         }
     }
 
     /**
-     * 获取已打开的 UI 组件
+     * 显示消息弹窗
+     * @param title 
+     * @param content 
+     * @param left 
+     * @param right 
      */
-    public getUI<T extends UIBase>(id: UIID): T | null {
-        const config = UIConfigData[id];
-        if (!config) return null;
-        return this._uiMap.get(config.prefab) as T || null;
-    }
+    async showMsgBox(data: MsgBoxData) {
+        let config = UIConfigData[UIID.MsgBox]
+        config.args = data
+        this.open<UIMsgBox>(config)
 
-    /**
-     * 内部加载器封装
-     */
-    private _loadResource<T>(path: string, bundleName: string): Promise<T> {
-        return new Promise((resolve, reject) => {
-
-            if (bundleName == "resources") {
-                resources.load(path, Prefab, (err, asset) => {
-                    if (err)
-                    {
-                        resolve(null);
-                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
-                    }
-                    else{
-                        resolve(asset as any);
-                    }
-                });
-            }
-            else{
-                XKit.res.load(bundleName,path,Prefab,(err,asset)=>{
-                    if (err)
-                    {
-                        resolve(null);
-                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
-                    }
-                    else{
-                        resolve(asset as any);
-                    }
-                })
-            }
-        });
     }
 
 
@@ -240,50 +278,14 @@ export class GUI {
         config.args = content
         this.open<UIToast>(config)
     }
-    /**
-     * 从对象池获取UI组件
-     * @param path 
-     * @returns 
-     */
-    protected getPoolByPath(path:string):UIBase[]
-    {
-        return this.uiPool.get(path) || []
-    }
 
     /**
-     * 回收UI组件到对象池
-     * @param comp 
+     * 获取已打开的 UI 组件
      */
-    protected recycleToPool(comp:UIBase){
-        console.log("recycle to pool:",comp._url)
-        let arr = this.uiPool.get(comp._url)
-        if(!arr){
-            arr = []
-            arr.push(comp)
-        }
-        else{
-            if(arr.length >= this.poolSize){
-                //超出池子大小，直接销毁
-                comp.node.destroy()
-                return
-            }else{
-                arr.push(comp)
-            }
-        }
-        this.uiPool.set(comp._url,arr)
-
+    public getUI<T extends UIBase>(id: UIID): T | null {
+        const config = UIConfigData[id];
+        if (!config) return null;
+        return this._uiMap.get(config.prefab) as T || null;
     }
-    /**
-     * 显示消息弹窗
-     * @param title 
-     * @param content 
-     * @param left 
-     * @param right 
-     */
-    async showMsgBox(data:MsgBoxData) { 
-        let config = UIConfigData[UIID.MsgBox]
-        config.args = data
-        this.open<UIMsgBox>(config)
-        
-    }
+    //#endregion
 }
