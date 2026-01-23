@@ -1,6 +1,7 @@
 import { AudioManager } from "./audio/AudioManager";
 import { EventManager } from "./event/EventManager";
 import { GUI } from "./GUI/GUI";
+import { PopupManager } from "./GUI/PopupManager";
 import { Logger } from "./log/Logger";
 import { ResLoader } from "./res/ResLoader";
 import { StorageManager } from "./storage/StorageManager";
@@ -21,4 +22,6 @@ export  class XKit {
     static storage: StorageManager = new StorageManager();
     /** 全局消息 */
     static message: EventManager = EventManager.instance
+
+    static popManager:PopupManager = null
 }

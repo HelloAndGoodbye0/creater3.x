@@ -5,12 +5,23 @@ const { ccclass, property } = _decorator;
 
 
 /**
- * 消息盒子选项
+ * 按钮数据项
  */
-export interface MsgBoxDataOptions
+export interface MsgBoxBtnOptions
 {
     txt:string
     click?:Function
+}
+
+/**
+ * 消息盒子数据
+ */
+export interface MsgBoxData
+{
+    title:string
+    content:string
+    left:MsgBoxBtnOptions
+    right?:MsgBoxBtnOptions
 }
 
 @ccclass('msgBox')
@@ -107,8 +118,9 @@ export class UIMsgBox extends UIBase {
      * @param right 右按键
      * @param left 左按键
      */
-    refresh( title:string, content:string, left:MsgBoxDataOptions, right?:MsgBoxDataOptions )
+    refresh(data:MsgBoxData) 
     {
+        let {title, content, right, left} = data
         //更新title
         this.lbTitle.string = title
         //更新内容

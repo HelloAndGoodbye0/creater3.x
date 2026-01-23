@@ -5,7 +5,7 @@ import { UILayer } from './UILayer';
 import { UIConfig, UIConfigData, UIID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
-import { UIMsgBox, MsgBoxDataOptions } from '../../../script/view/msgBox/UIMsgBox';
+import { UIMsgBox, MsgBoxBtnOptions, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
 
 const { ccclass } = _decorator;
 
@@ -73,6 +73,8 @@ export class GUI {
         let layer = data.layer
         let args = data?.args
         let bundleName = data.bundle
+        let usePool = data.usePool || false
+
         // 1. 检查是否已经打开
         if (this._uiMap.has(path)) {
             let comp = this._uiMap.get(path)
@@ -81,7 +83,28 @@ export class GUI {
             return comp as T;
         }
 
-        // 2. 加载资源 (优先从缓存获取)
+        // 2. 如果使用对象池，先尝试从池中获取
+        if (usePool) {
+            let pool = this.getPoolByPath(path)
+            let comp = pool?.pop() as T
+            if (comp) {
+                // 从池中获取的组件，需要重新激活和设置参数
+                comp.node.active = true
+                comp.refresh(args)
+                comp.show()
+
+                // 添加到指定层级
+                const layerNode = this._layerMap.get(layer);
+                if (layerNode) {
+                    layerNode.addChild(comp.node);
+                } else {
+                    this._root.addChild(comp.node);
+                }
+                return comp;
+            }
+        }
+
+        // 3. 加载资源 (优先从缓存获取)
         let prefab = this._prefabCache.get(path);
         if (!prefab) {
             prefab = await this._loadResource<Prefab>(path, bundleName);
@@ -96,7 +119,7 @@ export class GUI {
             }
         }
 
-        // 3. 实例化
+        // 4. 实例化
         const node = instantiate(prefab);
         const comp = node.getComponent(UIBase);
         if (!comp) {
@@ -105,11 +128,12 @@ export class GUI {
             return null;
         }
 
-        // 4. 设置基础属性
+        // 5. 设置基础属性
         comp._url = path;
+        comp._usePool = usePool;
         
 
-        // 5. 添加到指定层级
+        // 6. 添加到指定层级
         const layerNode = this._layerMap.get(layer);
         if (layerNode) {
             layerNode.addChild(node);
@@ -117,7 +141,7 @@ export class GUI {
             this._root.addChild(node); // 降级处理
         }
 
-        // 6. 记录并调用生命周期
+        // 7. 记录并调用生命周期
         this._uiMap.set(path, comp);
         comp.show()
         comp.refresh(args)
@@ -146,9 +170,17 @@ export class GUI {
         if (comp) {
             comp.close(()=>{
                 callback?.()
-                if(bDestory)
+                // 从已打开UI中移除
+                this._uiMap.delete(path);
+                
+                if(comp._usePool && !bDestory)
                 {
-                    this._uiMap.delete(path);
+                    // 使用对象池且不强制销毁，回收到池中
+                    this.recycleToPool(comp);
+                }
+                else if(bDestory)
+                {
+                    // 强制销毁
                     comp.node.destroy();
                 }
             },bSkipAnim)
@@ -272,34 +304,36 @@ export class GUI {
      * @param left 
      * @param right 
      */
-    async showMsgBox(title: string, content: string, left: MsgBoxDataOptions, right?: MsgBoxDataOptions) { 
+    async showMsgBox(data:MsgBoxData) { 
         let config = UIConfigData[UIID.MsgBox]
-        let pool = this.getPoolByPath(config.prefab)
-        let msgBoxComp:UIMsgBox = pool?.pop() as UIMsgBox
-        if(!msgBoxComp)
-        {
-            let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
-            if(prefab)
-            {
-                let node = instantiate(prefab)
-                let layer = this._layerMap.get(config.layer)
-                if(layer)
-                {
-                    layer.addChild(node)
-                    msgBoxComp = node.getComponent(UIMsgBox)
-                    msgBoxComp._url = config.prefab
-                }
-                else
-                {
-                    XKit.log.logBusiness("no find msgBox layer")
-                }
-            }
-        }
-        msgBoxComp?.refresh(title, content, left, right)
-        msgBoxComp?.show()
-        msgBoxComp?.setCloseHandler((box:UIMsgBox)=>{
-            this.recycleToPool(box)
-        })
+        config.args = data
+        this.open<UIMsgBox>(config)
+        // let pool = this.getPoolByPath(config.prefab)
+        // let msgBoxComp:UIMsgBox = pool?.pop() as UIMsgBox
+        // if(!msgBoxComp)
+        // {
+        //     let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
+        //     if(prefab)
+        //     {
+        //         let node = instantiate(prefab)
+        //         let layer = this._layerMap.get(config.layer)
+        //         if(layer)
+        //         {
+        //             layer.addChild(node)
+        //             msgBoxComp = node.getComponent(UIMsgBox)
+        //             msgBoxComp._url = config.prefab
+        //         }
+        //         else
+        //         {
+        //             XKit.log.logBusiness("no find msgBox layer")
+        //         }
+        //     }
+        // }
+        // msgBoxComp?.refresh(data)
+        // msgBoxComp?.show()
+        // msgBoxComp?.setCloseHandler((box:UIMsgBox)=>{
+        //     this.recycleToPool(box)
+        // })
         
     }
 }

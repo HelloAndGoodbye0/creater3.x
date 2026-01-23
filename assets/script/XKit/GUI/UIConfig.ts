@@ -1,6 +1,7 @@
 import { UILayer } from "./UILayer";
 
 
+
 /** 界面唯一标识（方便服务器通过编号数据触发界面打开） */
 export enum UIID {
 
@@ -24,6 +25,8 @@ export interface UIConfig {
     prefab: string;
     //传递给界面的参数
     args?: any;
+    //是否加入缓存池
+    usePool?: boolean;
 }
 
 
@@ -33,7 +36,7 @@ export var UIConfigData: { [key: number]: UIConfig } = {
     //菊花转
     [UIID.Waiting]: { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" },
     //toast
-    [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources" },
+    [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: true },
     //消息框
-    [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources" },
+    [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
 }

@@ -109,6 +109,8 @@ export abstract class UIBase extends Component {
     protected _args: any = null;
     /** 资源路径（由管理器赋值） */
     public _url: string = "";
+    /** 是否使用对象池 */
+    public _usePool: boolean = false;
 
 
     /**

@@ -11,6 +11,8 @@ import { UIWaiting } from './view/wait/UIWaiting';
 import { AudioManager } from './XKit/audio/AudioManager';
 import { UIBase } from './XKit/GUI/UIBase';
 import { utils } from './XKit/utils/utils';
+import { PopupManager } from './XKit/GUI/PopupManager';
+import { MsgBoxData } from './view/msgBox/UIMsgBox';
 
 
 
@@ -39,6 +41,27 @@ export class main extends UIBase {
         XKit.gui = new GUI()
         XKit.gui.init(this.node)
 
+        //弹框管理
+        XKit.popManager = new PopupManager(XKit.gui);
+        XKit.popManager.addPopup({
+            uiId: UIID.MsgBox,
+            args: {
+                title: "提示",
+                content: "请勿重复点击",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
+        })
+
+        XKit.popManager.addPopup({
+            uiId: UIID.MsgBox,
+            args: {
+                title: "提示",
+                content: "请勿重复点击11111",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
+        })
 
     }
     showGuide(target: Node) {
@@ -62,11 +85,17 @@ export class main extends UIBase {
 
         utils.ButtonBindClick(this.btn_alert,()=>{
             
-            XKit.gui.showMsgBox("提示", "这是一个测试", { txt: "确定", click: () =>{
-                XKit.log.logBusiness("点击确定")
-            }}, { txt: "取消" ,click: () =>{
-                XKit.log.logBusiness("点击取消")
-            }})
+            let data:MsgBoxData = {
+                title: "提示",
+                content: "这是一个测试",
+                right: { txt: "确定", click: () =>{
+                    XKit.log.logBusiness("点击确定")
+                }},
+                left: { txt: "取消" ,click: () =>{
+                    XKit.log.logBusiness("点击取消")
+                }}
+            }
+            XKit.gui.showMsgBox(data)
 
         })
 
