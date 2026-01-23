@@ -237,32 +237,8 @@ export class GUI {
      */
     async toast(content: string) {
         let config = UIConfigData[UIID.Toast]
-        let pool = this.getPoolByPath(config.prefab)
-        let toastComp:UIToast = pool?.pop() as UIToast
-        if(!toastComp)
-        {
-            let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
-            if(prefab)
-            {
-                let node = instantiate(prefab)
-                let layer = this._layerMap.get(config.layer)
-                if(layer)
-                {
-                    layer.addChild(node)
-                    toastComp = node.getComponent(UIToast)
-                    toastComp._url = config.prefab
-                }
-                else
-                {
-                    XKit.log.logBusiness("no find toast layer")
-                }
-            }
-        }
-        toastComp?.show()
-        toastComp?.refresh(content,(comp:UIToast)=>{
-            this.recycleToPool(comp)
-        })
-        
+        config.args = content
+        this.open<UIToast>(config)
     }
     /**
      * 从对象池获取UI组件
@@ -308,32 +284,6 @@ export class GUI {
         let config = UIConfigData[UIID.MsgBox]
         config.args = data
         this.open<UIMsgBox>(config)
-        // let pool = this.getPoolByPath(config.prefab)
-        // let msgBoxComp:UIMsgBox = pool?.pop() as UIMsgBox
-        // if(!msgBoxComp)
-        // {
-        //     let prefab = await this._loadResource<Prefab>(config.prefab, config.bundle)
-        //     if(prefab)
-        //     {
-        //         let node = instantiate(prefab)
-        //         let layer = this._layerMap.get(config.layer)
-        //         if(layer)
-        //         {
-        //             layer.addChild(node)
-        //             msgBoxComp = node.getComponent(UIMsgBox)
-        //             msgBoxComp._url = config.prefab
-        //         }
-        //         else
-        //         {
-        //             XKit.log.logBusiness("no find msgBox layer")
-        //         }
-        //     }
-        // }
-        // msgBoxComp?.refresh(data)
-        // msgBoxComp?.show()
-        // msgBoxComp?.setCloseHandler((box:UIMsgBox)=>{
-        //     this.recycleToPool(box)
-        // })
         
     }
 }

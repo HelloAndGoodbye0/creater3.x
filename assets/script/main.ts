@@ -42,32 +42,27 @@ export class main extends UIBase {
         XKit.gui.init(this.node)
 
         //弹框管理
-        XKit.popManager = new PopupManager(XKit.gui);
-        XKit.popManager.addPopup({
-            uiId: UIID.MsgBox,
-            args: {
-                title: "提示",
-                content: "请勿重复点击",
-                left: { txt: "确定" },
-                right: { txt: "取消" }
-            },
-        })
+        // XKit.popManager = new PopupManager(XKit.gui);
+        // XKit.popManager.addPopup({
+        //     uiId: UIID.MsgBox,
+        //     args: {
+        //         title: "提示",
+        //         content: "请勿重复点击",
+        //         left: { txt: "确定" },
+        //         right: { txt: "取消" }
+        //     },
+        // })
 
-        XKit.popManager.addPopup({
-            uiId: UIID.MsgBox,
-            args: {
-                title: "提示",
-                content: "请勿重复点击11111",
-                left: { txt: "确定" },
-                right: { txt: "取消" }
-            },
-        })
+        // XKit.popManager.addPopup({
+        //     uiId: UIID.MsgBox,
+        //     args: {
+        //         title: "提示",
+        //         content: "请勿重复点击11111",
+        //         left: { txt: "确定" },
+        //         right: { txt: "取消" }
+        //     },
+        // })
 
-    }
-    showGuide(target: Node) {
-        // var lcoal_pos = convert2NodePos(this.mask, this.mChild.alert)
-        // this.mask.position = lcoal_pos
-        // this.mask.getComponent(UITransform).contentSize = target.getComponent(UITransform).contentSize
     }
     start() {
 

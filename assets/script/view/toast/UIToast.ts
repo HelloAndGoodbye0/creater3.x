@@ -1,6 +1,7 @@
 import { utils } from '../../../script/XKit/utils/utils';
 import { UIBase } from '../../../script/XKit/GUI/UIBase';
 import { _decorator, Animation, Label, Node } from 'cc';
+import { XKit } from '../../../script/XKit/XKit';
 const { ccclass, property } = _decorator;
 
 @ccclass('UIToast')
@@ -17,11 +18,10 @@ export class UIToast extends UIBase {
      * @param str 
      * @param onFinish
      */
-    refresh(str: string,onFinish: (comp: UIToast)=> void): void {
+    refresh(str: string): void {
         this.label.string = str;
         utils.playAnimation(this.aniToast, "notify",this,()=>{
-            this.close()
-            onFinish(this);
+            XKit.gui.close(this._url)
         });
         //设置最上层
         this.node.setSiblingIndex(-1)
