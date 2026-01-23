@@ -135,10 +135,7 @@ export abstract class UIBase extends Component {
         }
     }
 
-    /**
-     * 打开时立即执行（不等待动画）
-     */
-    protected onShow(){}
+
 
     /**
      * 关闭页面
@@ -170,6 +167,11 @@ export abstract class UIBase extends Component {
             }) 
         }
     }
+
+    /**
+     * 打开时立即执行（动画前）
+     */
+    protected onShow(){}
 
     /**
      * 关闭时执行
