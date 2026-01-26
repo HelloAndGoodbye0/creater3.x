@@ -3,7 +3,7 @@
 import { _decorator, Component, Label, CCInteger, Node, UITransform, director, Button } from 'cc';
 import { tutorial } from 'pb_framework';
 const { ccclass, property } = _decorator;
-import {ConstEventDefine} from './config/ConstEventDefine';
+import { ConstEventDefine } from './config/ConstEventDefine';
 import { XKit } from './XKit/XKit';
 import { GUI } from './XKit/GUI/GUI';
 import { UIID } from './XKit/GUI/UIConfig';
@@ -46,68 +46,76 @@ export class main extends UIBase {
         XKit.popManager.addPopup({
             uiId: UIID.MsgBox,
             args: {
-                title: "提示",
-                content: "请勿重复点击00000",
+                title: "提示1",
+                content: "1",
                 left: { txt: "确定" },
                 right: { txt: "取消" }
             },
-            onClosed: () => { 
-                console.log("弹框0000关闭了")
+            popCount:1,
+            onClosed: () => {
+                console.log("弹框1关闭了")
             }
         })
 
         XKit.popManager.addPopup({
             uiId: UIID.MsgBox,
             args: {
-                title: "提示",
-                content: "请勿重复点击11111",
+                title: "提示2",
+                content: "2",
                 left: { txt: "确定" },
                 right: { txt: "取消" }
             },
-            onClosed: () => { 
-                console.log("弹框1111111关闭了")
+            popCount:2,
+            onClosed: () => {
+                console.log("弹框2关闭了")
             }
         })
 
-            XKit.popManager.addPopup({
+        XKit.popManager.addPopup({
             uiId: UIID.MsgBox,
             args: {
-                title: "提示",
-                content: "请勿重复点击222222",
+                title: "提示3",
+                content: "3",
                 left: { txt: "确定" },
                 right: { txt: "取消" }
             },
-            onClosed: () => { 
-                console.log("弹框22222关闭了")
+            popCount:3,
+            onClosed: () => {
+                console.log("弹框3关闭了")
             }
         })
+        XKit.popManager.startPopup();
 
     }
     start() {
 
-        utils.ButtonBindClick(this.btn_load,async ()=>{
-            let waiting:UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
+        utils.ButtonBindClick(this.btn_load, async () => {
+            let waiting: UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
             setTimeout(() => {
                 XKit.gui.close(UIID.Waiting)
             }, 3000)
         })
-        
 
-        utils.ButtonBindClick(this.btn_event,()=>{
+
+        utils.ButtonBindClick(this.btn_event, () => {
             this.emit(ConstEventDefine.TEST, { "name": "Lee123" })
         })
 
-        utils.ButtonBindClick(this.btn_alert,()=>{
-            
-            let data:MsgBoxData = {
+        utils.ButtonBindClick(this.btn_alert, () => {
+
+            let data: MsgBoxData = {
                 title: "提示",
                 content: "这是一个测试",
-                right: { txt: "确定", click: () =>{
-                    XKit.log.logBusiness("点击确定")
-                }},
-                left: { txt: "取消" ,click: () =>{
-                    XKit.log.logBusiness("点击取消")
-                }}
+                right: {
+                    txt: "确定", click: () => {
+                        XKit.log.logBusiness("点击确定")
+                    }
+                },
+                left: {
+                    txt: "取消", click: () => {
+                        XKit.log.logBusiness("点击取消")
+                    }
+                }
             }
             XKit.gui.showMsgBox(data)
 

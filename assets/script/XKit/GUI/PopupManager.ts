@@ -2,6 +2,8 @@
 import { UIBase } from './UIBase';
 import { GUI } from './GUI';
 import { UIConfigData, UIID } from './UIConfig';
+import { NoticeOptions } from 'extensions/i18n/@types/editor/task/public/interface';
+import { XKit } from '../XKit';
 
 /**
  * 弹框配置接口
@@ -17,6 +19,8 @@ export interface IPopupConfig {
     priority?: number;
     /** 条件检查函数，返回true才弹出 */
     condition?: () => boolean;
+    /**弹出次数 */
+    popCount?:number; //弹出次数记录
 }
 
 /**
@@ -29,6 +33,8 @@ export class PopupManager {
     private currentPopup: UIBase | null = null;
     private isProcessing: boolean = false;
 
+    private popInterval: any = null;
+    protected popIntervalTime: number = 10000;
     constructor(gui: GUI) {
         this.gui = gui;
     }
@@ -36,25 +42,52 @@ export class PopupManager {
     /**
      * 添加弹框到队列
      * @param config 弹框配置
+     * @param isFront 是否优先显示
      */
-    addPopup(config: IPopupConfig): void {
-        // 根据优先级插入队列
-        const priority = config.priority || 0;
-        let insertIndex = this.popupQueue.length;
-        for (let i = 0; i < this.popupQueue.length; i++) {
-            if ((this.popupQueue[i].priority || 0) < priority) {
-                insertIndex = i;
-                break;
-            }
-        }
-        this.popupQueue.splice(insertIndex, 0, config);
+    addPopup(config: IPopupConfig,isFront?:boolean): void {
+        //先判断数组里面是否已经有了
+        // if (this.popupQueue.find(item => item.uiId === config.uiId)) {
+        //     return;
+        // }
 
-        // 如果当前没有在处理，开始处理队列
-        if (!this.isProcessing) {
-            this.processQueue();
+        if(isFront)
+        {
+            this.popupQueue.unshift(config);
+        }
+        else
+        {
+            // 根据优先级插入队列
+            let  priority = config.priority || 0;
+            let insertIndex = this.popupQueue.length;
+            for (let i = 0; i < this.popupQueue.length; i++) {
+                if ((this.popupQueue[i].priority || 0) < priority) {
+                    insertIndex = i;
+                    break;
+                }
+            }
+            this.popupQueue.splice(insertIndex, 0, config);
         }
     }
 
+    /**
+     * 开始处理弹框队列
+     */
+    startPopup(): void {
+        this.processQueue();
+        this.popInterval = setInterval(()=>{ 
+            this.processQueue();
+        },this.popIntervalTime)
+    }
+    /**
+     * 停止处理弹框队列
+     */
+    stopPopup(): void {
+        if(this.popInterval)
+        {
+            clearInterval(this.popInterval);
+            this.popInterval = null;
+        }
+    }
     /**
      * 批量添加弹框
      * @param configs 弹框配置数组
@@ -84,17 +117,7 @@ export class PopupManager {
         return this.popupQueue.length === 0;
     }
 
-    /**
-     * 强制关闭当前弹框并继续下一个
-     */
-    forceCloseCurrent(): void {
-        if (this.currentPopup) {
-            // 通过GUI.close来确保正确的回收逻辑
-            this.gui.close(this.currentPopup._url, false, true, () => {
-                this.onPopupClosed();
-            });
-        }
-    }
+
 
     /**
      * 处理弹框队列
@@ -106,9 +129,26 @@ export class PopupManager {
 
         this.isProcessing = true;
 
-        while (this.popupQueue.length > 0) {
-            const config = this.popupQueue.shift()!;
-            await this.showPopup(config);
+        let index  = 0
+        let needRemoveIndex = []
+        while (index<this.popupQueue.length) {
+            const config = this.popupQueue[index]
+            if(config)
+            {
+                 await this.showPopup(config);
+                 config.popCount--
+                 if(config.popCount<=0)
+                 {
+                    needRemoveIndex.push(index)
+                 }
+            }
+            index++
+        }
+
+        //删除次数为0的 从后面往前删除
+        for(let i=needRemoveIndex.length-1;i>=0;i--)
+        {
+            this.popupQueue.splice(needRemoveIndex[i],1)
         }
 
         this.isProcessing = false;
@@ -121,7 +161,20 @@ export class PopupManager {
         try {
             // 检查条件
             if (config?.condition && !config.condition()) {
+                XKit.log.logBusiness(config.uiId,"弹框条件不满足");
                 return 
+            }
+            // 检查次数
+            if(config.popCount<=0)
+            {
+                XKit.log.logBusiness(config.uiId,"弹框次数已用完");
+                return
+            }
+
+            if(this.currentPopup)
+            {
+                XKit.log.logBusiness(config.uiId,"弹框正在显示中");
+                return
             }
 
             // 打开弹框
@@ -129,7 +182,7 @@ export class PopupManager {
             uiConfig.args = config.args || [];
             const popup = await this.gui.open<UIBase>(uiConfig);
             if (!popup) {
-                console.warn(`Failed to open popup: ${config.uiId}`);
+                XKit.log.logBusiness(`Failed to open popup: ${config.uiId}`);
                 return;
             }
 
@@ -154,7 +207,7 @@ export class PopupManager {
             });
 
         } catch (error) {
-            console.error('Error showing popup:', config);
+            XKit.log.logBusiness(config,'Error showing popup:');
         }
     }
 
