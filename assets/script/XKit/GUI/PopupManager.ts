@@ -148,6 +148,7 @@ export class PopupManager {
                         this.onPopupClosed(config.onClosed);
                         callback?.();
                         resolve(); // 弹框关闭时resolve Promise
+                        popup.close = originalClose; // 恢复原始close方法
                     }, bSkipAnim);
                 };
             });

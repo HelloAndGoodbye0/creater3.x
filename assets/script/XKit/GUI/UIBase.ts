@@ -2,7 +2,6 @@
 import { _decorator, assetManager, Component, Enum, Animation } from 'cc';
 import { XKit } from '../XKit';
 import { EDITOR } from 'cc/env';
-import { ListenerFunc } from '../event/EventMessage';
 import { utils } from '../utils/utils';
 const { ccclass, property } = _decorator;
 
@@ -191,16 +190,16 @@ export abstract class UIBase extends Component {
  
 
     //# region 事件监听
-     on(name:string,callback:ListenerFunc,target:any)
+     on(name:string,callback:Function,target:any)
      {
         XKit.message.on(name,callback,target)
      }
 
-     once(name:string,callback:ListenerFunc,target:any)
+     once(name:string,callback:Function,target:any)
      {
         XKit.message.once(name,callback,target)
      }
-     off(name:string,callback:ListenerFunc,target:any)
+     off(name:string,callback:Function,target:any)
      {
         XKit.message.off(name,callback,target)
      }

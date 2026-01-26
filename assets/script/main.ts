@@ -42,26 +42,45 @@ export class main extends UIBase {
         XKit.gui.init(this.node)
 
         //弹框管理
-        // XKit.popManager = new PopupManager(XKit.gui);
-        // XKit.popManager.addPopup({
-        //     uiId: UIID.MsgBox,
-        //     args: {
-        //         title: "提示",
-        //         content: "请勿重复点击",
-        //         left: { txt: "确定" },
-        //         right: { txt: "取消" }
-        //     },
-        // })
+        XKit.popManager = new PopupManager(XKit.gui);
+        XKit.popManager.addPopup({
+            uiId: UIID.MsgBox,
+            args: {
+                title: "提示",
+                content: "请勿重复点击00000",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
+            onClosed: () => { 
+                console.log("弹框0000关闭了")
+            }
+        })
 
-        // XKit.popManager.addPopup({
-        //     uiId: UIID.MsgBox,
-        //     args: {
-        //         title: "提示",
-        //         content: "请勿重复点击11111",
-        //         left: { txt: "确定" },
-        //         right: { txt: "取消" }
-        //     },
-        // })
+        XKit.popManager.addPopup({
+            uiId: UIID.MsgBox,
+            args: {
+                title: "提示",
+                content: "请勿重复点击11111",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
+            onClosed: () => { 
+                console.log("弹框1111111关闭了")
+            }
+        })
+
+            XKit.popManager.addPopup({
+            uiId: UIID.MsgBox,
+            args: {
+                title: "提示",
+                content: "请勿重复点击222222",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
+            onClosed: () => { 
+                console.log("弹框22222关闭了")
+            }
+        })
 
     }
     start() {
