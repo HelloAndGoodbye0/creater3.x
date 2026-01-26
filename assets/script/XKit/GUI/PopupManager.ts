@@ -154,7 +154,7 @@ export class PopupManager {
             });
 
         } catch (error) {
-            console.error('Error showing popup:', error);
+            console.error('Error showing popup:', config);
         }
     }
 
