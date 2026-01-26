@@ -3,6 +3,8 @@ import { _decorator, assetManager, Component, Enum, Animation } from 'cc';
 import { XKit } from '../XKit';
 import { EDITOR } from 'cc/env';
 import { utils } from '../utils/utils';
+import { UIID } from './UIConfig';
+import { UIWaiting } from 'assets/script/view/wait/UIWaiting';
 const { ccclass, property } = _decorator;
 
 
@@ -209,4 +211,17 @@ export abstract class UIBase extends Component {
         XKit.message.emit(name,...args)
      }
     //# endregion
+
+    //## region 菊花转
+    protected async showLoading(b:boolean)
+    {
+        if(b)
+        {
+           let waiting: UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
+        }
+        else
+        {
+            XKit.gui.close(UIID.Waiting)
+        }
+    }
 }

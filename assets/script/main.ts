@@ -90,9 +90,9 @@ export class main extends UIBase {
     start() {
 
         utils.ButtonBindClick(this.btn_load, async () => {
-            let waiting: UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
+           this.showLoading(true)
             setTimeout(() => {
-                XKit.gui.close(UIID.Waiting)
+                 this.showLoading(false)
             }, 3000)
         })
 
