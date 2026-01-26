@@ -224,4 +224,5 @@ export abstract class UIBase extends Component {
             XKit.gui.close(UIID.Waiting)
         }
     }
+    //## endregion
 }
