@@ -2,7 +2,6 @@
 import { UIBase } from './UIBase';
 import { GUI } from './GUI';
 import { UIConfigData, UIID } from './UIConfig';
-import { NoticeOptions } from 'extensions/i18n/@types/editor/task/public/interface';
 import { XKit } from '../XKit';
 
 /**
@@ -28,13 +27,21 @@ export interface IPopupConfig {
  * 基于GUI和UIBase，提供队列管理、优先级、条件检查等功能
  */
 export class PopupManager {
+    /** GUI实例 */
     private gui: GUI;
+    /** 弹框队列 */
     private popupQueue: IPopupConfig[] = [];
+    /** 当前显示的弹框 */
     private currentPopup: UIBase | null = null;
+    /** 弹框队列处理中 */
     private isProcessing: boolean = false;
-
+    /**弹框时间 */
     private popInterval: any = null;
-    protected popIntervalTime: number = 10000;
+    /**一轮弹框的时间间隔 (毫秒)*/
+    private popIntervalTime: number = 1000;
+    /**弹框间隔(毫秒) */
+    private delayTime: number = 0;
+
     constructor(gui: GUI) {
         this.gui = gui;
     }
@@ -141,6 +148,10 @@ export class PopupManager {
                  {
                     needRemoveIndex.push(index)
                  }
+                // 添加间隔等待
+                 if(this.delayTime > 0){
+                     await this.delay(this.delayTime);
+                 }
             }
             index++
         }
@@ -154,6 +165,13 @@ export class PopupManager {
         this.isProcessing = false;
     }
 
+    
+    /**
+     * 延迟方法
+     */
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
     /**
      * 显示单个弹框
      */
