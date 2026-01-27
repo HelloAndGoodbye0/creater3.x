@@ -19,7 +19,7 @@ export interface IPopupConfig {
     /** 条件检查函数，返回true才弹出 */
     condition?: () => boolean;
     /**弹出次数 */
-    popCount?:number; //弹出次数记录
+    popCount?: number; //弹出次数记录
 }
 
 /**
@@ -51,20 +51,18 @@ export class PopupManager {
      * @param config 弹框配置
      * @param isFront 是否优先显示
      */
-    addPopup(config: IPopupConfig,isFront?:boolean): void {
+    addPopup(config: IPopupConfig, isFront?: boolean): void {
         //先判断数组里面是否已经有了
         // if (this.popupQueue.find(item => item.uiId === config.uiId)) {
         //     return;
         // }
 
-        if(isFront)
-        {
+        if (isFront) {
             this.popupQueue.unshift(config);
         }
-        else
-        {
+        else {
             // 根据优先级插入队列
-            let  priority = config.priority || 0;
+            let priority = config.priority || 0;
             let insertIndex = this.popupQueue.length;
             for (let i = 0; i < this.popupQueue.length; i++) {
                 if ((this.popupQueue[i].priority || 0) < priority) {
@@ -81,16 +79,15 @@ export class PopupManager {
      */
     startPopup(): void {
         this.processQueue();
-        this.popInterval = setInterval(()=>{ 
+        this.popInterval = setInterval(() => {
             this.processQueue();
-        },this.popIntervalTime)
+        }, this.popIntervalTime)
     }
     /**
      * 停止处理弹框队列
      */
     stopPopup(): void {
-        if(this.popInterval)
-        {
+        if (this.popInterval) {
             clearInterval(this.popInterval);
             this.popInterval = null;
         }
@@ -179,19 +176,17 @@ export class PopupManager {
         try {
             // 检查条件
             if (config?.condition && !config.condition()) {
-                XKit.log.logBusiness(config.uiId,"弹框条件不满足");
-                return 
+                XKit.log.logBusiness(config.uiId, "弹框条件不满足");
+                return
             }
             // 检查次数
-            if(config.popCount<=0)
-            {
-                XKit.log.logBusiness(config.uiId,"弹框次数已用完");
+            if (config.popCount <= 0) {
+                XKit.log.logBusiness(config.uiId, "弹框次数已用完");
                 return
             }
 
-            if(this.currentPopup)
-            {
-                XKit.log.logBusiness(config.uiId,"弹框正在显示中");
+            if (this.currentPopup) {
+                XKit.log.logBusiness(config.uiId, "弹框正在显示中");
                 return
             }
 
@@ -225,7 +220,7 @@ export class PopupManager {
             });
 
         } catch (error) {
-            XKit.log.logBusiness(config,'Error showing popup:');
+            XKit.log.logBusiness(config, 'Error showing popup:');
         }
     }
 
@@ -238,19 +233,12 @@ export class PopupManager {
     }
 
     /**
-     * 扩展：添加自定义弹框类型
-     * 子类可以重写此方法来处理特殊类型的弹框
+     * 清空弹框队列
      */
-    protected handleCustomPopup(config: IPopupConfig): boolean {
-        // 默认不处理，返回false让基类处理
-        return false;
-    }
+    clear(): void {
+        this.currentPopup = null;
+        this.popupQueue = [];
+        this.isProcessing = false;
 
-    /**
-     * 扩展：自定义弹框显示逻辑
-     */
-    protected async customShowPopup(config: IPopupConfig): Promise<boolean> {
-        // 默认不处理，返回false让基类处理
-        return false;
     }
 }
