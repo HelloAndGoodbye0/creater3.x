@@ -172,7 +172,8 @@ export class PopupManager {
                     await this.showPopup(config);
                     //更新次数
                     config.popCount =  config.popCount - 1;
-                    if (this.delayTime > 0) {
+                    //有弹框间隔 && 间隔不算最后一个
+                    if (this.delayTime > 0 && i<(this.popupQueue.length-1)) {
                         await this.delay(this.delayTime);
                     }
                 }
