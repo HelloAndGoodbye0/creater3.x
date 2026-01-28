@@ -54,7 +54,7 @@ export class PopupManager {
     /**
      * 添加弹框到队列
      * @param config 弹框配置
-     * @param isFront 是否优先显示
+     * @param isFront 是否插入队列最前面
      * @param isImmediate 是否立即弹出（跳过队列直接显示）
      */
     addPopup(config: IPopupConfig, isFront?: boolean, isImmediate?: boolean): void {
