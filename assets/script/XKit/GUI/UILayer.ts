@@ -10,10 +10,10 @@ export enum UILayer {
     Dialog ,
     /*网络等待*/
     Waiting ,
-    /** Toast提示层 */
-    Toast,
     /** 跑马灯 */
     Notify ,
+    /** Toast提示层 */
+    Toast,
     /** 新手引导层 */
     Guide 
 }
