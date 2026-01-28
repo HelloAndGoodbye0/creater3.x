@@ -226,6 +226,12 @@ export class PopupManager {
                 XKit.log.logBusiness(`Failed to open popup: ${config.uiId}`);
                 return;
             }
+            if(this.isPaused)
+            {
+                XKit.log.logBusiness(`Popup ${config.uiId} is paused.`);
+                this.gui.close(popup._url);
+                return 
+            }
 
             this.currentPopup = popup;
 
@@ -265,6 +271,9 @@ export class PopupManager {
     private pause(): void {
         if (!this.isPaused) {
             this.isPaused = true;
+            if(this.currentPopup){
+                this.gui.close(this.currentPopup._url);
+            }
             XKit.log.logBusiness( "PopupManager pause pop");
         }
     }
