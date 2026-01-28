@@ -46,6 +46,8 @@ export class PopupManager {
         this.gui = gui;
     }
 
+
+    //#region 外部调用
     /**
      * 添加弹框到队列
      * @param config 弹框配置
@@ -100,12 +102,7 @@ export class PopupManager {
         configs.forEach(config => this.addPopup(config));
     }
 
-    /**
-     * 清除队列中的所有弹框
-     */
-    clearQueue(): void {
-        this.popupQueue = [];
-    }
+
 
     /**
      * 获取当前弹框
@@ -121,7 +118,16 @@ export class PopupManager {
         return this.popupQueue.length === 0;
     }
 
+        /**
+     * 清空弹框队列
+     */
+    clear(): void {
+        this.currentPopup = null;
+        this.popupQueue = [];
+        this.isProcessing = false;
 
+    }
+    // #endregion
 
     /**
      * 处理弹框队列
@@ -232,13 +238,5 @@ export class PopupManager {
         onClosed?.();
     }
 
-    /**
-     * 清空弹框队列
-     */
-    clear(): void {
-        this.currentPopup = null;
-        this.popupQueue = [];
-        this.isProcessing = false;
 
-    }
 }
