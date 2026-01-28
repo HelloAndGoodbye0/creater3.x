@@ -68,12 +68,13 @@ export class PopupManager {
     addPopup(config: IPopupConfig, isFront?: boolean, isImmediate?: boolean): void {
         // 如果立即弹出，直接显示该弹框
         if (isImmediate) {
-            this.showPopup(config);
             //关闭当前已经打开了的弹框？
             if(this.currentPopup!=null)
             {
                 this.gui.close(this.currentPopup._url)
             }
+
+            this.showPopup(config);
             
             return;
         }
@@ -178,7 +179,7 @@ export class PopupManager {
      
             }
             // 整个队列处理完成，过滤掉次数已用完的弹框
-            if (!this.isPaused || this.currentQueueIndex == (this.popupQueue.length-1)) {
+            if (!this.isPaused) {
                 this.popupQueue = this.popupQueue.filter(config => (config.popCount ?? 0) > 0);
                 this.currentQueueIndex = 0; // 正常情况下重置索引
             }
@@ -274,7 +275,7 @@ export class PopupManager {
             if(this.currentPopup){
                 this.gui.close(this.currentPopup._url);
             }
-            XKit.log.logBusiness( "PopupManager pause pop");
+            XKit.log.logBusiness( "PopupManager pause");
         }
     }
 
@@ -284,9 +285,9 @@ export class PopupManager {
     private resume(): void {
         if (this.isPaused) {
             this.isPaused = false;
-            XKit.log.logBusiness( "PopupManager resume pop");
             // 立即触发一次队列处理，从中断位置继续
             this.processQueue();
+            XKit.log.logBusiness( "PopupManager resume");
         }
     }
 }
