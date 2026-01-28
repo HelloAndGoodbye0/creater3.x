@@ -55,8 +55,21 @@ export class PopupManager {
      * 添加弹框到队列
      * @param config 弹框配置
      * @param isFront 是否优先显示
+     * @param isImmediate 是否立即弹出（跳过队列直接显示）
      */
-    addPopup(config: IPopupConfig, isFront?: boolean): void {
+    addPopup(config: IPopupConfig, isFront?: boolean, isImmediate?: boolean): void {
+        // 如果立即弹出，直接显示该弹框
+        if (isImmediate) {
+            this.showPopup(config);
+            //关闭当前已经打开了的弹框？
+            if(this.currentPopup!=null)
+            {
+                this.gui.close(this.currentPopup._url)
+            }
+            
+            return;
+        }
+
         if (isFront) {
             this.popupQueue.unshift(config);
             return;
