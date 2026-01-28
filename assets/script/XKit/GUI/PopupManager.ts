@@ -20,6 +20,7 @@ export interface IPopupConfig {
     condition?: () => boolean;
     /**弹出次数 */
     popCount?: number; //弹出次数记录
+
 }
 
 /**
@@ -30,7 +31,7 @@ export class PopupManager {
     /** 默认弹框优先级 */
     private static readonly DEFAULT_PRIORITY = 0;
     /** 队列处理时间间隔（毫秒） */
-    private static readonly QUEUE_PROCESS_INTERVAL = 1000;
+    private static readonly QUEUE_PROCESS_INTERVAL = 5000;
 
     /** GUI实例 */
     private gui: GUI;
@@ -42,11 +43,18 @@ export class PopupManager {
     private isProcessing: boolean = false;
     /** 队列处理定时器 */
     private popInterval: NodeJS.Timeout | null = null;
+    /** 自动弹框是否暂停 */
+    private isPaused: boolean = false;
+    /** 当前处理的队列索引，供恢复时继续 */
+    private currentQueueIndex: number = 0;
     /** 2个弹框之间的间隔(毫秒) */
-    private delayTime: number = 0;
+    private delayTime: number = 3000;
 
     constructor(gui: GUI) {
         this.gui = gui;
+        // 订阅GUI事件
+        this.gui.onNonAutoPopupOpened = () => this.pause();
+        this.gui.onNonAutoPopupClosed = () => this.resume();
     }
 
 
@@ -133,7 +141,7 @@ export class PopupManager {
         this.currentPopup = null;
         this.popupQueue = [];
         this.isProcessing = false;
-
+        this.currentQueueIndex = 0;
     }
     // #endregion
 
@@ -141,23 +149,39 @@ export class PopupManager {
      * 处理弹框队列
      */
     private async processQueue(): Promise<void> {
-        if (this.isProcessing || this.popupQueue.length === 0) {
+        // 如果暂停或没有队列，不处理
+        if (this.isPaused || this.isProcessing || this.popupQueue.length === 0) {
             return;
         }
 
         this.isProcessing = true;
-
         try {
-            for (const config of this.popupQueue) {
-                await this.showPopup(config);
-                config.popCount = (config.popCount ?? 0) - 1;
-                if (this.delayTime > 0) {
-                    await this.delay(this.delayTime);
+            // 从当前索引开始处理，支持恢复后继续
+            for (let i = this.currentQueueIndex; i < this.popupQueue.length; i++) {
+                const config = this.popupQueue[i];
+                
+                // 处理中再次检查暂停状态
+                if (this.isPaused) {
+                    this.currentQueueIndex = i; // 记录中断位置
+                    break;
                 }
-            }
 
-            // 过滤掉次数已用完的弹框
-            this.popupQueue = this.popupQueue.filter(config => (config.popCount ?? 0) > 0);
+                if(config.popCount>0)
+                {
+                    await this.showPopup(config);
+                    //更新次数
+                    config.popCount =  config.popCount - 1;
+                    if (this.delayTime > 0) {
+                        await this.delay(this.delayTime);
+                    }
+                }
+     
+            }
+            // 整个队列处理完成，过滤掉次数已用完的弹框
+            if (!this.isPaused || this.currentQueueIndex == (this.popupQueue.length-1)) {
+                this.popupQueue = this.popupQueue.filter(config => (config.popCount ?? 0) > 0);
+                this.currentQueueIndex = 0; // 正常情况下重置索引
+            }
         } finally {
             this.isProcessing = false;
         }
@@ -177,23 +201,24 @@ export class PopupManager {
         try {
             // 检查条件
             if (config.condition && !config.condition()) {
-                XKit.log.logBusiness(config.uiId, "弹框条件不满足");
+                XKit.log.logBusiness(config.uiId, "condition not met");
                 return;
             }
 
             // 检查次数
             if ((config.popCount ?? 0) <= 0) {
-                XKit.log.logBusiness(config.uiId, "弹框次数已用完");
+                XKit.log.logBusiness(config.uiId, "popCount<=0 uid:");
                 return;
             }
 
             if (this.currentPopup) {
-                XKit.log.logBusiness(config.uiId, "弹框正在显示中");
+                XKit.log.logBusiness(config.uiId, "currentPopup!=null");
                 return;
             }
 
-            // 打开弹框 需要复制一份 避免影响原数据
-            const uiConfig = structuredClone(UIConfigData[config.uiId])
+            // 打开弹框 需要设置bAuto为true 使用浅拷贝
+            const baseConfig = UIConfigData[config.uiId];
+            const uiConfig = { ...baseConfig }; // 浅克隆
             uiConfig.args = config.args || {};
             uiConfig.bAuto = true;
             const popup = await this.gui.open<UIBase>(uiConfig);
@@ -234,5 +259,25 @@ export class PopupManager {
         onClosed?.();
     }
 
+    /**
+     * 暂停自动弹框处理
+     */
+    private pause(): void {
+        if (!this.isPaused) {
+            this.isPaused = true;
+            XKit.log.logBusiness( "PopupManager pause pop");
+        }
+    }
 
+    /**
+     * 恢复自动弹框处理
+     */
+    private resume(): void {
+        if (this.isPaused) {
+            this.isPaused = false;
+            XKit.log.logBusiness( "PopupManager resume pop");
+            // 立即触发一次队列处理，从中断位置继续
+            this.processQueue();
+        }
+    }
 }

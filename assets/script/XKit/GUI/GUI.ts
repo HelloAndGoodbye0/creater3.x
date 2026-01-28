@@ -24,8 +24,10 @@ export class GUI {
     protected uiPool: Map<string, UIBase[]> = new Map()
     /**同一种类 UI 池的最大数量 */
     protected poolSize: number = 8
-    /**当前打开弹框数量*/
-    protected openedNum: number = 0
+    /**非自动弹框打开回调*/
+    public onNonAutoPopupOpened?: () => void;
+    /**非自动弹框关闭回调*/
+    public onNonAutoPopupClosed?: () => void;
 
 
 
@@ -147,7 +149,7 @@ export class GUI {
         let usePool = data.usePool || false
         if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
         {
-            this.openedNum++
+            this.onNonAutoPopupOpened?.();
         }
         // 1. 检查是否已经打开
         if (this._uiMap.has(path)) {
@@ -246,7 +248,7 @@ export class GUI {
             let bAuto = comp._bAuto;
             if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
             {
-                this.openedNum--
+                this.onNonAutoPopupClosed?.();
             }
             comp.close(() => {
                 callback?.()
@@ -300,12 +302,6 @@ export class GUI {
         return this._uiMap.get(config.prefab) as T || null;
     }
 
-    /**
-     * 当前是否有已经打开的popup和dialog
-     * @returns 
-     */
-    public isBusy(): boolean {
-        return this.openedNum> 0;
-    }
+
     //#endregion
 }
