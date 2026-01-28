@@ -192,9 +192,10 @@ export class PopupManager {
                 return;
             }
 
-            // 打开弹框
-            const uiConfig = UIConfigData[config.uiId];
+            // 打开弹框 需要复制一份 避免影响原数据
+            const uiConfig = structuredClone(UIConfigData[config.uiId])
             uiConfig.args = config.args || {};
+            uiConfig.bAuto = true;
             const popup = await this.gui.open<UIBase>(uiConfig);
             if (!popup) {
                 XKit.log.logBusiness(`Failed to open popup: ${config.uiId}`);

@@ -5,6 +5,7 @@ import { EDITOR } from 'cc/env';
 import { utils } from '../utils/utils';
 import { UIID } from './UIConfig';
 import { UIWaiting } from 'assets/script/view/wait/UIWaiting';
+import { UILayer } from './UILayer';
 const { ccclass, property } = _decorator;
 
 
@@ -106,12 +107,14 @@ export abstract class UIBase extends Component {
         }
     }
 
-    /** 传入的参数 */
-    protected _args: any = null;
     /** 资源路径（由管理器赋值） */
     public _url: string = "";
     /** 是否使用对象池 */
     public _usePool: boolean = false;
+    /** 属于哪个界面层 */
+    public _layer: UILayer = null;
+    /** 是否自动打开的 */
+    public _bAuto: boolean = false;
 
 
     /**

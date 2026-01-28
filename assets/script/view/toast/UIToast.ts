@@ -23,8 +23,7 @@ export class UIToast extends UIBase {
         utils.playAnimation(this.aniToast, "notify",this,()=>{
             XKit.gui.close(this._url)
         });
-        //设置最上层
-        this.node.setSiblingIndex(-1)
+
     }
 
 

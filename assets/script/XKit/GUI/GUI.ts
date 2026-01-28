@@ -12,22 +12,20 @@ const { ccclass } = _decorator;
 @ccclass('GUI')
 export class GUI {
 
-    // 存储层级节点的 Map
+    /** 存储层级节点的 Map*/
     private _layerMap: Map<UILayer, Node> = new Map();
-    // 存储已打开 UI 的 Map <路径, UIBase组件>
+    /**UI 组件缓存 <路径, 组件实例数组> */
     private _uiMap: Map<string, UIBase> = new Map();
-    // 简单的资源缓存 <路径, Prefab>
+    /**预制缓存 <路径, Prefab> */
     private _prefabCache: Map<string, Prefab> = new Map();
-
+    /**ui根节点 */
     private _root: Node = null;
-    /**
-     * UI 对象池 <路径, UIBase组件数组>
-     */
+    /**UI 对象池 <路径, UIBase组件数组>*/
     protected uiPool: Map<string, UIBase[]> = new Map()
-    // 同一种类 UI 池的最大数量
+    /**同一种类 UI 池的最大数量 */
     protected poolSize: number = 8
-
-
+    /**当前打开弹框数量*/
+    protected openedNum: number = 0
 
 
 
@@ -145,8 +143,12 @@ export class GUI {
         let layer = data.layer
         let args = data?.args
         let bundleName = data.bundle
+        let bAuto = data.bAuto || false
         let usePool = data.usePool || false
-
+        if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
+        {
+            this.openedNum++
+        }
         // 1. 检查是否已经打开
         if (this._uiMap.has(path)) {
             let comp = this._uiMap.get(path)
@@ -165,8 +167,12 @@ export class GUI {
                 //使用缓存池设置唯一的key
                 let uniqueKey = `${path}_${Date.now()}`
                 comp._url = uniqueKey
+                comp._usePool = usePool;
+                comp._layer = layer
+                comp._bAuto = bAuto
                 this._uiMap.set( uniqueKey, comp );
-
+                //设置最上层
+                comp.node.setSiblingIndex(-1)
                 return comp;
             }
         }
@@ -197,7 +203,11 @@ export class GUI {
         let uniqueKey = usePool ? `${path}_${Date.now()}`: path;
         comp._url = uniqueKey
         comp._usePool = usePool;
+        comp._layer = layer;
+        comp._bAuto = bAuto
         this._uiMap.set(uniqueKey, comp);
+        //设置最上层
+        comp.node.setSiblingIndex(-1)
       
 
         // 6. 添加到指定层级
@@ -232,6 +242,12 @@ export class GUI {
         }
         const comp = this._uiMap.get(path);
         if (comp) {
+            let layer = comp._layer;
+            let bAuto = comp._bAuto;
+            if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
+            {
+                this.openedNum--
+            }
             comp.close(() => {
                 callback?.()
                 // 从已打开UI中移除
@@ -282,6 +298,14 @@ export class GUI {
         const config = UIConfigData[id];
         if (!config) return null;
         return this._uiMap.get(config.prefab) as T || null;
+    }
+
+    /**
+     * 当前是否有已经打开的popup和dialog
+     * @returns 
+     */
+    public isBusy(): boolean {
+        return this.openedNum> 0;
     }
     //#endregion
 }

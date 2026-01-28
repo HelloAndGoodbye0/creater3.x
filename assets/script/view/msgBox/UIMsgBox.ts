@@ -140,8 +140,6 @@ export class UIMsgBox extends UIBase {
 
         this.setBtnInteractable(true)
 
-        //设置msgbox为Dialog层最上层
-        this.node.setSiblingIndex(-1)
     }
 
 
