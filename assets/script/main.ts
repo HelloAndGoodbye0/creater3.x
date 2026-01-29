@@ -32,9 +32,10 @@ export class main extends UIBase {
         //弹框管理
         XKit.popManager = new PopupManager(XKit.gui);
 
-        
+        //加载必要bundle
         await XKit.res.loadBundle("100");
-
+        //TODO热更新？
+        //去登录界面
         globalThis.goLogin()
 
     }

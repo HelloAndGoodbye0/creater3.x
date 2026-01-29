@@ -215,17 +215,5 @@ export abstract class UIBase extends Component {
      }
     //# endregion
 
-    //## region 菊花转
-    protected async showLoading(b:boolean)
-    {
-        if(b)
-        {
-           let waiting: UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
-        }
-        else
-        {
-            XKit.gui.close(UIID.Waiting)
-        }
-    }
-    //## endregion
+
 }

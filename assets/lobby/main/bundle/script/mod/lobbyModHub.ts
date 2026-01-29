@@ -1,4 +1,4 @@
-import { PModuleID } from "../PModule";
+import { PModuleID } from "../PModuleID";
 import { lobbyMod } from "./lobbyMod";
 type lobbModConstructor  = {new(...a:any):lobbyMod, ID:number}
 export class lobbyModHub {

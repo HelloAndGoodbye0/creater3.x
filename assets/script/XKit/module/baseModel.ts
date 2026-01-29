@@ -1,4 +1,4 @@
-import { HttpReturn } from "../http/httpRequest"
+
 import { XKit } from "../XKit"
 
 
@@ -91,34 +91,6 @@ export abstract class baseModule {
         XKit.message.targetOff(this)
     }
 
-    /**
-     * 发起网络请求
-     * @param method 
-     * @param url 
-     * @param data 
-     */
-    request(method: HttpType, url: string, data?: any): Promise<any>
-    {
-        return new Promise((resolve,reject)=>{
-               // 回调处理
-            const completeCall = (data: HttpReturn) => {
-                 let success = data.isSucc;
-                 if (success) {
-                     resolve(data.res)
-                 }
-                 else {
-                     reject(null)
-                 }
-            };
-
-            // 发起请求
-            if (method === HttpType.POST) {
-                XKit.http.post(url, completeCall,data);
-            } else {
-                XKit.http.get(url, completeCall,data);
-            }
-        })
-    }
 
     /** 基类复写初始化逻辑 */
     protected abstract onInit(...args:any):void

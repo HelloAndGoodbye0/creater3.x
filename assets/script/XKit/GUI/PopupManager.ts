@@ -48,7 +48,7 @@ export class PopupManager {
     /** 当前处理的队列索引，供恢复时继续 */
     private currentQueueIndex: number = 0;
     /** 2个弹框之间的间隔(毫秒) */
-    private delayTime: number = 3000;
+    private delayTime: number = 0;
 
     constructor(gui: GUI) {
         this.gui = gui;
