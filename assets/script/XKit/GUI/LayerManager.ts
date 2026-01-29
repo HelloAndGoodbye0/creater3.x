@@ -236,30 +236,27 @@ export class LayerManager {
         bDestory = bDestory || false;
         bSkipAnim = bSkipAnim || false;
         XKit.log.logBusiness(`close: ${path}`)
-        const comp = this._uiMap.get(path);
-        if (comp) {
+        let comp = this._uiMap.get(path);
+        comp?.close(() => {
+            // 从已打开UI中移除
+            this._uiMap.delete(path);
+            //使用缓存池 或者 不销毁 都放进池子里
+            if (comp._usePool || !bDestory) {
+                
+                this.recycleToPool(comp);
+            }
+            else if (bDestory) {
+                // 强制销毁
+                comp.node.destroy();
+            }
             let layer = comp._layer;
             let bAuto = comp._bAuto;
             if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
             {
                 this.onNonAutoPopupClosed?.();
             }
-            comp.close(() => {
-                // 从已打开UI中移除
-                this._uiMap.delete(path);
-                //使用缓存池 或者 不销毁 都放进池子里
-                if (comp._usePool || !bDestory) {
-                   
-                    this.recycleToPool(comp);
-                }
-                else if (bDestory) {
-                    // 强制销毁
-                    comp.node.destroy();
-                
-                }
-                callback?.()
-            }, bSkipAnim)
-        }
+            callback?.()
+        }, bSkipAnim)
     }
 
     /**
