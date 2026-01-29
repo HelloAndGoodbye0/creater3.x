@@ -1,7 +1,6 @@
 export enum PModuleID {
-
-    //登录
-    Login = 100,
     //大厅
-    Lobby = 101
+    Lobby = 100,
+    //登录
+    Login = 101,
 }

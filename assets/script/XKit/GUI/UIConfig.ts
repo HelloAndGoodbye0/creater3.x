@@ -44,10 +44,5 @@ export var UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: true },
     //消息框
     [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
-    //大厅
-    [UIID.Lobby]: { layer: UILayer.UI, prefab: "prefabs/lobby", bundle: "100"},
-
-    //大厅
-    [UIID.Login]: { layer: UILayer.UI, prefab: "prefabs/login", bundle: "100"},
 
 }
