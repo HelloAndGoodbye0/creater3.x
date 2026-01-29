@@ -2,6 +2,7 @@ import { AudioManager } from "./audio/AudioManager";
 import { EventManager } from "./event/EventManager";
 import { GUI } from "./GUI/GUI";
 import { PopupManager } from "./GUI/PopupManager";
+import { HttpRequest } from "./http/httpRequest";
 import { Logger } from "./log/Logger";
 import { ResLoader } from "./res/ResLoader";
 import { StorageManager } from "./storage/StorageManager";
@@ -22,6 +23,8 @@ export  class XKit {
     static storage: StorageManager = new StorageManager();
     /** 全局消息 */
     static message: EventManager = EventManager.instance
-
+    /** 全局弹框管理 */
     static popManager:PopupManager = null
+    /** 全局http请求 */
+    static http:HttpRequest = new HttpRequest();
 }
