@@ -232,9 +232,7 @@ export class LayerManager {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: string, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void {
-        bDestory = bDestory || false;
-        bSkipAnim = bSkipAnim || false;
+    public close(path: string, bDestory:boolean = false, bSkipAnim: boolean = false, callback?: Function): void {
         XKit.log.logBusiness(`close: ${path}`)
         let comp = this._uiMap.get(path);
         comp?.close(() => {
