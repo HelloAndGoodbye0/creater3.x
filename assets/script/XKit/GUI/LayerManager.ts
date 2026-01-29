@@ -1,16 +1,16 @@
 // scripts/framework/ui/UIManager.ts
-import { _decorator, Node, Prefab, resources, instantiate, Director, director, Widget, UITransform, Size, view, error, warn } from 'cc';
+import { _decorator, Node, Prefab, resources, instantiate, Widget, error, } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
 import { UIConfig, UIConfigData, UIID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
-import { UIMsgBox, MsgBoxBtnOptions, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
+import { UIMsgBox, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
 
 const { ccclass } = _decorator;
 
-@ccclass('GUI')
-export class GUI {
+@ccclass('LayerManager')
+export class LayerManager {
 
     /** 存储层级节点的 Map*/
     private _layerMap: Map<UILayer, Node> = new Map();

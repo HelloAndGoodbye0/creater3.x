@@ -4,11 +4,10 @@ import { _decorator, Component, Label, CCInteger, Node, UITransform, director, B
 
 const { ccclass, property } = _decorator;
 import { XKit } from './XKit/XKit';
-import { GUI } from './XKit/GUI/GUI';
+import { LayerManager } from './XKit/GUI/LayerManager';
 import { AudioManager } from './XKit/audio/AudioManager';
 import { UIBase } from './XKit/GUI/UIBase';
 import { PopupManager } from './XKit/GUI/PopupManager';
-import { lobbyModHub } from '../lobby/main/bundle/script/mod/lobbyModHub';
 
 
 
@@ -26,7 +25,7 @@ export class main extends UIBase {
         XKit.audio = persistRootNode.addComponent(AudioManager);
         XKit.audio.load();
         // 初始化GUI
-        XKit.gui = new GUI()
+        XKit.gui = new LayerManager()
         XKit.gui.init(this.node)
 
         //弹框管理

@@ -1,6 +1,6 @@
 import { AudioManager } from "./audio/AudioManager";
 import { EventManager } from "./event/EventManager";
-import { GUI } from "./GUI/GUI";
+import { LayerManager } from "./GUI/LayerManager";
 import { PopupManager } from "./GUI/PopupManager";
 import { HttpRequest } from "./http/HttpRequest";
 import { Language } from "./language/Language";
@@ -13,7 +13,7 @@ import { StorageManager } from "./storage/StorageManager";
  */
 export  class XKit {
     // 全局GUI管理器
-    public static gui:GUI = null
+    public static gui:LayerManager = null
     // 全局资源加载器
     public static res:ResLoader = new ResLoader();
     /** 游戏音乐管理 */

@@ -1,6 +1,6 @@
 // scripts/framework/ui/PopupManager.ts
 import { UIBase } from './UIBase';
-import { GUI } from './GUI';
+import { LayerManager } from './LayerManager';
 import { UIConfigData, UIID } from './UIConfig';
 import { XKit } from '../XKit';
 
@@ -34,7 +34,7 @@ export class PopupManager {
     private static readonly QUEUE_PROCESS_INTERVAL = 5000;
 
     /** GUI实例 */
-    private gui: GUI;
+    private gui: LayerManager;
     /** 弹框队列 */
     private popupQueue: IPopupConfig[] = [];
     /** 当前显示的弹框 */
@@ -50,7 +50,7 @@ export class PopupManager {
     /** 2个弹框之间的间隔(毫秒) */
     private delayTime: number = 0;
 
-    constructor(gui: GUI) {
+    constructor(gui: LayerManager) {
         this.gui = gui;
         // 订阅GUI事件
         this.gui.onNonAutoPopupOpened = () => this.pause();

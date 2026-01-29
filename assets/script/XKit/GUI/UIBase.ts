@@ -3,8 +3,6 @@ import { _decorator, assetManager, Component, Enum, Animation } from 'cc';
 import { XKit } from '../XKit';
 import { EDITOR } from 'cc/env';
 import { utils } from '../utils/utils';
-import { UIID } from './UIConfig';
-import { UIWaiting } from 'assets/script/view/wait/UIWaiting';
 import { UILayer } from './UILayer';
 const { ccclass, property } = _decorator;
 
