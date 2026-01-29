@@ -251,6 +251,7 @@ export class LayerManager {
             }
             let layer = comp._layer;
             let bAuto = comp._bAuto;
+            //手动弹框关闭后通知 弹框管理器继续？
             if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
             {
                 this.onNonAutoPopupClosed?.();
