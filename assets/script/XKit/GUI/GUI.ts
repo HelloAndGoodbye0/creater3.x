@@ -74,6 +74,23 @@ export class GUI {
     }
 
     /**
+     * 设置UI组件属性并添加到映射表
+     * @param comp UI组件
+     * @param uniqueKey 唯一键
+     * @param config UI配置
+
+     */
+    private _setupUIComponent(comp: UIBase, uniqueKey: string, config:UIConfig): void {
+        comp._url = uniqueKey;
+        comp._usePool = config.usePool;
+        comp._layer = config.layer;
+        comp._bAuto = config.bAuto || false;
+        this._uiMap.set(uniqueKey, comp);
+        // 设置层级
+        comp.node.setSiblingIndex(-1);
+    }
+
+    /**
      * 回收UI组件到对象池
      * @param comp 
      */
@@ -168,13 +185,7 @@ export class GUI {
                 comp.refresh(args)
                 //使用缓存池设置唯一的key
                 let uniqueKey = `${path}_${Date.now()}`
-                comp._url = uniqueKey
-                comp._usePool = usePool;
-                comp._layer = layer
-                comp._bAuto = bAuto
-                this._uiMap.set( uniqueKey, comp );
-                //设置最上层
-                comp.node.setSiblingIndex(-1)
+                this._setupUIComponent(comp, uniqueKey, data);
                 return comp;
             }
         }
@@ -203,13 +214,7 @@ export class GUI {
 
         // 5. 使用缓存池设置唯一的key
         let uniqueKey = usePool ? `${path}_${Date.now()}`: path;
-        comp._url = uniqueKey
-        comp._usePool = usePool;
-        comp._layer = layer;
-        comp._bAuto = bAuto
-        this._uiMap.set(uniqueKey, comp);
-        //设置最上层
-        comp.node.setSiblingIndex(-1)
+        this._setupUIComponent(comp, uniqueKey, data);
       
 
         // 6. 添加到指定层级
@@ -301,7 +306,14 @@ export class GUI {
         if (!config) return null;
         return this._uiMap.get(config.prefab) as T || null;
     }
-
+    /**
+     * 获得UILayer对应的根节点
+     * @param layer 
+     * @returns 
+     */
+    getUIRootLayer(layer: UILayer): Node {
+        return this._layerMap.get(layer);
+    }
 
     //#endregion
 }
