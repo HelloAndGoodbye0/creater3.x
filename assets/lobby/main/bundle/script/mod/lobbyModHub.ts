@@ -1,6 +1,6 @@
 import { PModuleID } from "../PModuleID";
 import { lobbyMod } from "./lobbyMod";
-type lobbModConstructor  = {new(...a:any):lobbyMod, ID:number}
+type LobbyModuleClass  = {new(...a:any):lobbyMod, ID:number}
 export class lobbyModHub {
     
     
@@ -13,7 +13,7 @@ export class lobbyModHub {
         return this.instance;
     }
     //模块ID与模块映射 (存储继承lobbyMod的类构造函数)
-    private id2Mod: Map<PModuleID,lobbModConstructor > = new Map();
+    private id2Mod: Map<PModuleID,LobbyModuleClass > = new Map();
 
     //大厅模块 (存储已创建的模块实例)
     private modules:Map<PModuleID, lobbyMod> = new Map<PModuleID, lobbyMod>()
@@ -22,7 +22,7 @@ export class lobbyModHub {
      * @param id 
      * @param mod 
      */
-    public registerModule(id:PModuleID,mod: lobbModConstructor) {
+    public registerModule(id:PModuleID,mod: LobbyModuleClass) {
         this.id2Mod.set(id, mod);
     }
 
@@ -73,7 +73,7 @@ export class lobbyModHub {
         }
     }
 
-    enter( ctor:lobbModConstructor, ...args:any )
+    enter( ctor:LobbyModuleClass, ...args:any )
     {
         if(this.modules.has(ctor.ID))
         {
@@ -91,7 +91,7 @@ export class lobbyModHub {
         }
     }
 
-    exit( ctor:lobbModConstructor, ...args:any )
+    exit( ctor:LobbyModuleClass, ...args:any )
     {
         if(this.modules.has(ctor.ID))
         {
