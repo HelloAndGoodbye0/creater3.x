@@ -7,11 +7,12 @@ export enum UIID {
 
     Waiting = 0,//菊花转
 
-    Toast = 1,//toast
+    Toast,//toast
 
-    MsgBox=2,//消息框
+    MsgBox,//消息框
 
-    Lobby=3,//大厅
+    Login,//登录
+    Lobby,//大厅
 }
 
 
@@ -45,5 +46,8 @@ export var UIConfigData: { [key: number]: UIConfig } = {
     [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
     //大厅
     [UIID.Lobby]: { layer: UILayer.UI, prefab: "prefabs/lobby", bundle: "100"},
+
+    //大厅
+    [UIID.Login]: { layer: UILayer.UI, prefab: "prefabs/login", bundle: "100"},
 
 }

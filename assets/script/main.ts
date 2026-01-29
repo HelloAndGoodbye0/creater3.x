@@ -5,10 +5,10 @@ import { _decorator, Component, Label, CCInteger, Node, UITransform, director, B
 const { ccclass, property } = _decorator;
 import { XKit } from './XKit/XKit';
 import { GUI } from './XKit/GUI/GUI';
-import { UIID } from './XKit/GUI/UIConfig';
 import { AudioManager } from './XKit/audio/AudioManager';
 import { UIBase } from './XKit/GUI/UIBase';
 import { PopupManager } from './XKit/GUI/PopupManager';
+import { lobbyModHub } from '../lobby/main/bundle/script/mod/lobbyModHub';
 
 
 
@@ -18,7 +18,7 @@ export class main extends UIBase {
 
 
 
-    onLoad() {
+    async onLoad() {
 
         let persistRootNode = new Node("PersistRootNode");
         director.addPersistRootNode(persistRootNode);
@@ -32,7 +32,10 @@ export class main extends UIBase {
         //弹框管理
         XKit.popManager = new PopupManager(XKit.gui);
 
-        XKit.gui.open(UIID.Lobby)
+        
+        await XKit.res.loadBundle("100");
+
+        globalThis.goLogin()
 
     }
 

@@ -23,16 +23,11 @@ export enum HttpType {
 export abstract class baseModule {
 
     /**
-     * 模块ID
-     */
-    protected _moduleID:number = 0
-    /**
      * 初始化模块
      * @param args 
      */
-    init(ID:number,...args:any) 
+    init(...args:any) 
     {
-        this._moduleID = ID
         this.onInit(...args)
         this.addEventListener()
     }
