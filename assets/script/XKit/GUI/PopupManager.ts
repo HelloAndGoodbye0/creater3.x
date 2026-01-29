@@ -72,6 +72,7 @@ export class PopupManager {
             if(this.currentPopup!=null)
             {
                 this.gui.close(this.currentPopup._url)
+                this.currentPopup = null;
             }
 
             this.showPopup(config);
@@ -135,10 +136,14 @@ export class PopupManager {
         return this.popupQueue.length === 0;
     }
 
-        /**
+    /**
      * 清空弹框队列
      */
     clear(): void {
+        if(this.currentPopup)
+        {
+            this.gui.close(this.currentPopup._url)
+        }
         this.currentPopup = null;
         this.popupQueue = [];
         this.isProcessing = false;
@@ -275,6 +280,7 @@ export class PopupManager {
             this.isPaused = true;
             if(this.currentPopup){
                 this.gui.close(this.currentPopup._url);
+                this.currentPopup = null;
             }
             XKit.log.logBusiness( "PopupManager pause");
         }
