@@ -8,10 +8,8 @@ import { XKit } from '../XKit';
  * 弹框配置接口
  */
 export interface IPopupConfig {
-    /** UI ID */
+    /** UIConfig */
     uiConfig: UIConfig;
-    /** 传递给弹框的参数 */
-    args?: any;
     /** 弹框关闭后的回调 */
     onClosed?: (result?: any) => void;
     /** 优先级，数字越大优先级越高 */
@@ -225,7 +223,6 @@ export class PopupManager {
 
             // 打开弹框 需要设置bAuto为true 使用浅拷贝
             let uiConfig = config.uiConfig
-            uiConfig.args = config.args || {};
             uiConfig.bAuto = true;
             const popup = await this.gui.open<UIBase>(uiConfig);
             if (!popup) {
@@ -241,9 +238,8 @@ export class PopupManager {
 
             this.currentPopup = popup;
 
-            // 刷新参数
-            if (config.args) {
-                popup.refresh(config.args);
+            if (uiConfig.args) {
+                popup.refresh(uiConfig.args);
             }
 
             // 创建等待弹框关闭的Promise

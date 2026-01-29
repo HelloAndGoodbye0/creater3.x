@@ -6,17 +6,17 @@ import { UILayer } from "./UILayer";
   * 界面配置接口
   */
 export interface UIConfig {
-    /** 远程包名 */
+    /** 远程包名 不传默认为resources包*/
     bundle?: string;
-    /** 窗口层级 */
+    /** 窗口层级 默认为UI*/
     layer?: UILayer;
-    /** 预制资源相对路径 */
+    /** 预制资源在bundle中的路径 */
     prefab: string;
     /** 传递给界面的参数 */
     args?: any;
-    /** 是否使用对象池 */
+    /** 是否使用对象池(比如toast,msgBox等可能多次使用的) */
     usePool?: boolean;
-    /** 是否自动打开 */
+    /** 是否自动打开(PopupManager弹出的会为true) */
     bAuto?: boolean;
 }
 

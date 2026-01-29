@@ -14,7 +14,7 @@ export class LayerManager {
 
     /** 存储层级节点的 Map*/
     private _layerMap: Map<UILayer, Node> = new Map();
-    /**UI 组件缓存 <路径, 组件实例数组> */
+    /**已经打开的UI组件缓存 <路径, 组件实例数组> */
     private _uiMap: Map<string, UIBase> = new Map();
     /**预制缓存 <路径, Prefab> */
     private _prefabCache: Map<string, Prefab> = new Map();
@@ -95,8 +95,7 @@ export class LayerManager {
      * @param comp 
      */
     protected recycleToPool(comp: UIBase) {
-        // console.log("recycle to pool:", comp._url)
-        let key = comp._usePool? comp._url.split("_")[0]: comp._url
+        let key = comp._url.indexOf("_")>-1? comp._url.split("_")[0]: comp._url
         let arr = this.uiPool.get(key)
         if (!arr) {
             arr = []
@@ -164,6 +163,7 @@ export class LayerManager {
         {
             this.onNonAutoPopupOpened?.();
         }
+        XKit.log.logBusiness(args,`open: ${path}`)
         // 1. 检查是否已经打开
         if (this._uiMap.has(path)) {
             let comp = this._uiMap.get(path)
@@ -172,18 +172,16 @@ export class LayerManager {
             return comp as T;
         }
 
-        // 2. 如果使用对象池，先尝试从池中获取
-        if (usePool) {
-            let pool = this.getPoolByPath(path)
-            let comp = pool?.pop() as T
-            if (comp) {
-                comp.show()
-                comp.refresh(args)
-                //使用缓存池设置唯一的key
-                let uniqueKey = `${path}_${Date.now()}`
-                this._setupUIComponent(comp, uniqueKey, data);
-                return comp;
-            }
+        // 2 尝试从池中获取
+        let pool = this.getPoolByPath(path)
+        let cacheComp = pool?.pop() as T
+        if (cacheComp) {
+            cacheComp.show()
+            cacheComp.refresh(args)
+            //使用缓存池设置唯一的key
+            let uniqueKey = `${path}_${Date.now()}`
+            this._setupUIComponent(cacheComp, uniqueKey, data);
+            return cacheComp;
         }
 
         // 3. 加载资源 (优先从缓存获取)
@@ -237,7 +235,7 @@ export class LayerManager {
     public close(path: string, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void {
         bDestory = bDestory || false;
         bSkipAnim = bSkipAnim || false;
-
+        XKit.log.logBusiness(`close: ${path}`)
         const comp = this._uiMap.get(path);
         if (comp) {
             let layer = comp._layer;
@@ -247,18 +245,19 @@ export class LayerManager {
                 this.onNonAutoPopupClosed?.();
             }
             comp.close(() => {
-                callback?.()
                 // 从已打开UI中移除
                 this._uiMap.delete(path);
-
-                if (comp._usePool && !bDestory) {
-                    // 使用对象池且不强制销毁，回收到池中
+                //使用缓存池 或者 不销毁 都放进池子里
+                if (comp._usePool || !bDestory) {
+                   
                     this.recycleToPool(comp);
                 }
                 else if (bDestory) {
                     // 强制销毁
                     comp.node.destroy();
+                
                 }
+                callback?.()
             }, bSkipAnim)
         }
     }
