@@ -1,9 +1,9 @@
-import { ConstEventDefine } from '../../../../script/config/ConstEventDefine';
-import { MsgBoxData } from '../../../../script/view/msgBox/UIMsgBox';
-import { UIBase } from '../../../../script/XKit/GUI/UIBase';
-import { utils } from '../../../../script/XKit/utils/utils';
-import { XKit } from '../../../../script/XKit/XKit';
-import { _decorator, Button, Component, Node } from 'cc';
+import { ConstEventDefine } from '../../../../../script/config/ConstEventDefine';
+import { MsgBoxData } from '../../../../../script/view/msgBox/UIMsgBox';
+import { UIBase } from '../../../../../script/XKit/GUI/UIBase';
+import { utils } from '../../../../../script/XKit/utils/utils';
+import { XKit } from '../../../../../script/XKit/XKit';
+import { _decorator, Button } from 'cc';
 import { tutorial } from 'pb_framework';
 const { ccclass, property } = _decorator;
 
