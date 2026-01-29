@@ -10,6 +10,8 @@ export enum UIID {
     Toast = 1,//toast
 
     MsgBox=2,//消息框
+
+    Lobby=3,//大厅
 }
 
 
@@ -41,4 +43,7 @@ export var UIConfigData: { [key: number]: UIConfig } = {
     [UIID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: true },
     //消息框
     [UIID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
+    //大厅
+    [UIID.Lobby]: { layer: UILayer.UI, prefab: "prefabs/lobby", bundle: "100"},
+
 }
