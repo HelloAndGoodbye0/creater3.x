@@ -25,8 +25,7 @@ export class main extends UIBase {
         XKit.audio = persistRootNode.addComponent(AudioManager);
         XKit.audio.load();
         // 初始化GUI
-        XKit.gui = new LayerManager()
-        XKit.gui.init(this.node)
+        XKit.gui = new LayerManager(this.node)
 
         //弹框管理
         XKit.popManager = new PopupManager(XKit.gui);

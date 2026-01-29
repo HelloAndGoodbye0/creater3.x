@@ -122,7 +122,7 @@ export class LayerManager {
      * 建议在游戏入口脚本（如 Main.ts）的 onLoad 中调用
      * @param root 父节点，通常是 Canvas
      */
-    public init(root: Node): void {
+    constructor(root: Node) {
         this._root = root;
         this._layerMap.clear();
 
