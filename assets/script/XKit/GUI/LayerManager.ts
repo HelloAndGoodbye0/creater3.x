@@ -233,6 +233,10 @@ export class LayerManager {
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
     public close(path: string, bDestory:boolean = false, bSkipAnim: boolean = false, callback?: Function): void {
+        if(path?.length==0)
+        {
+            return 
+        }
         XKit.log.logBusiness(`close: ${path}`)
         let comp = this._uiMap.get(path);
         comp?.close(() => {
