@@ -73,7 +73,7 @@ export class lobbyModHub {
         }
     }
 
-    enter( ctor:LobbyModuleClass, ...args:any )
+    protected enter( ctor:LobbyModuleClass, ...args:any )
     {
         if(this.modules.has(ctor.ID))
         {
@@ -91,7 +91,7 @@ export class lobbyModHub {
         }
     }
 
-    exit( ctor:LobbyModuleClass, ...args:any )
+    protected exit( ctor:LobbyModuleClass, ...args:any )
     {
         if(this.modules.has(ctor.ID))
         {
