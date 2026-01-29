@@ -5,8 +5,8 @@ import { MsgBoxData } from '../../../../../../script/view/msgBox/UIMsgBox';
 import { utils } from '../../../../../../script/XKit/utils/utils';
 import { XKit } from '../../../../../../script/XKit/XKit';
 import { tutorial } from 'pb_framework';
-import { UIID } from '../../../../../../script/XKit/GUI/UIConfig';
 import { ConstEventDefine } from '../../config/ConstEventDefine';
+import { UILayer } from '../../../../../../script/XKit/GUI/UILayer';
 const { ccclass, property } = _decorator;
 
 @ccclass('viewLogin')
@@ -44,8 +44,9 @@ export class viewLogin extends UIBase {
 
 
     protected clickPopup() {
+        let msgBoxConfig = { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true }
         XKit.popManager.addPopup({
-            uiId: UIID.MsgBox,
+            uiConfig:msgBoxConfig,
             args: {
                 title: "提示1",
                 content: "1",
@@ -59,7 +60,7 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uiId: UIID.MsgBox,
+            uiConfig: msgBoxConfig,
             args: {
                 title: "提示2",
                 content: "2",
@@ -73,7 +74,7 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uiId: UIID.MsgBox,
+            uiConfig:msgBoxConfig,
             args: {
                 title: "提示3",
                 content: "3",

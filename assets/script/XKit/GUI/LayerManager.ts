@@ -2,7 +2,7 @@
 import { _decorator, Node, Prefab, resources, instantiate, Widget, error, } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
-import { UIConfig, UIConfigData, UIID } from './UIConfig';
+import { UIConfig } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
 import { UIMsgBox, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
@@ -151,19 +151,15 @@ export class LayerManager {
      * @param args 传递给 UI 的参数
      * @returns Promise<T> 返回对应的组件实例
      */
-    public async open<T extends UIBase>(data: UIID): Promise<T | null>;
-    public async open<T extends UIBase>(data: UIConfig): Promise<T | null>
-    public async open<T extends UIBase>(data: UIConfig | UIID): Promise<T | null> {
+    public async open<T extends UIBase>(data: UIConfig ): Promise<T | null> {
 
-        if (typeof data === "number") {
-            data = UIConfigData[data]
-        }
         let path = data.prefab
-        let layer = data.layer
-        let args = data?.args
-        let bundleName = data.bundle
-        let bAuto = data.bAuto || false
-        let usePool = data.usePool || false
+        let layer = data?.layer || UILayer.UI
+        let args = data?.args || {}
+        let bundleName = data?.bundle || "resources"
+        let bAuto = data?.bAuto || false
+        let usePool = data?.usePool || false
+
         if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
         {
             this.onNonAutoPopupOpened?.();
@@ -238,15 +234,10 @@ export class LayerManager {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: string, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void;
-    public close(id: number, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void;
-    public close(path: string | number, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void {
+    public close(path: string, bDestory?: boolean, bSkipAnim?: boolean, callback?: Function): void {
         bDestory = bDestory || false;
         bSkipAnim = bSkipAnim || false;
-        if (typeof path === "number") {
-            const config = UIConfigData[path];
-            path = config.prefab;
-        }
+
         const comp = this._uiMap.get(path);
         if (comp) {
             let layer = comp._layer;
@@ -280,7 +271,7 @@ export class LayerManager {
      * @param right 
      */
     async showMsgBox(data: MsgBoxData) {
-        let config = UIConfigData[UIID.MsgBox]
+        let config:UIConfig= { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true }
         config.args = data
         this.open<UIMsgBox>(config)
 
@@ -293,19 +284,12 @@ export class LayerManager {
      * @param useI18n 是否使用多语言
      */
     async toast(content: string) {
-        let config = UIConfigData[UIID.Toast]
+        let config:UIConfig = { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: true }
         config.args = content
         this.open<UIToast>(config)
     }
 
-    /**
-     * 获取已打开的 UI 组件
-     */
-    public getUI<T extends UIBase>(id: UIID): T | null {
-        const config = UIConfigData[id];
-        if (!config) return null;
-        return this._uiMap.get(config.prefab) as T || null;
-    }
+
     /**
      * 获得UILayer对应的根节点
      * @param layer 

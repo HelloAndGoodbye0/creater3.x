@@ -1,7 +1,7 @@
 // scripts/framework/ui/PopupManager.ts
 import { UIBase } from './UIBase';
 import { LayerManager } from './LayerManager';
-import { UIConfigData, UIID } from './UIConfig';
+import { UIConfig} from './UIConfig';
 import { XKit } from '../XKit';
 
 /**
@@ -9,7 +9,7 @@ import { XKit } from '../XKit';
  */
 export interface IPopupConfig {
     /** UI ID */
-    uiId: UIID;
+    uiConfig: UIConfig;
     /** 传递给弹框的参数 */
     args?: any;
     /** 弹框关闭后的回调 */
@@ -208,34 +208,33 @@ export class PopupManager {
         try {
             // 检查条件
             if (config.condition && !config.condition()) {
-                XKit.log.logBusiness(config.uiId, "condition not met");
+                XKit.log.logBusiness(config.uiConfig, "condition not met");
                 return;
             }
 
             // 检查次数
             if ((config.popCount ?? 0) <= 0) {
-                XKit.log.logBusiness(config.uiId, "popCount<=0 uid:");
+                XKit.log.logBusiness(config.uiConfig, "popCount<=0 uid:");
                 return;
             }
 
             if (this.currentPopup) {
-                XKit.log.logBusiness(config.uiId, "currentPopup!=null");
+                XKit.log.logBusiness(config.uiConfig, "currentPopup!=null");
                 return;
             }
 
             // 打开弹框 需要设置bAuto为true 使用浅拷贝
-            const baseConfig = UIConfigData[config.uiId];
-            const uiConfig = { ...baseConfig }; // 浅克隆
+            let uiConfig = config.uiConfig
             uiConfig.args = config.args || {};
             uiConfig.bAuto = true;
             const popup = await this.gui.open<UIBase>(uiConfig);
             if (!popup) {
-                XKit.log.logBusiness(`Failed to open popup: ${config.uiId}`);
+                XKit.log.logBusiness(`Failed to open popup: ${config.uiConfig}`);
                 return;
             }
             if(this.isPaused)
             {
-                XKit.log.logBusiness(`Popup ${config.uiId} is paused.`);
+                XKit.log.logBusiness(`Popup ${config.uiConfig} is paused.`);
                 this.gui.close(popup._url);
                 return 
             }
@@ -260,7 +259,7 @@ export class PopupManager {
                 };
             });
         } catch (error) {
-            XKit.log.logBusiness(config.uiId, `Error showing popup: ${error}`);
+            XKit.log.logBusiness(config.uiConfig, `Error showing popup: ${error}`);
         }
     }
 

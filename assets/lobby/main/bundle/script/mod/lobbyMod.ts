@@ -4,7 +4,7 @@ import { PModuleID } from '../PModuleID';
 import { HttpReturn } from '../../../../../script/XKit/http/HttpRequest';
 import { XKit } from '../../../../../script/XKit/XKit';
 import { UIWaiting } from '../../../../../script/view/wait/UIWaiting';
-import { UIID } from '../../../../../script/XKit/GUI/UIConfig';
+import { UILayer } from '../../../../../script/XKit/GUI/UILayer';
 const { ccclass, property } = _decorator;
 
 @ccclass('lobbyMod')
@@ -70,15 +70,18 @@ export class lobbyMod extends baseModule {
     }
 
     //#region 菊花转
+
+    protected _waiting: UIWaiting = null;
     protected async showLoading(b:boolean)
     {
         if(b)
         {
-           let waiting: UIWaiting = await XKit.gui.open<UIWaiting>(UIID.Waiting)
+           let config = { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" }
+           this._waiting = await XKit.gui.open<UIWaiting>(config)
         }
         else
         {
-            XKit.gui.close(UIID.Waiting)
+            XKit.gui.close(this._waiting._url)
         }
     }
     //## endregion
