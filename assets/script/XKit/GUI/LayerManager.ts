@@ -238,9 +238,16 @@ export class LayerManager {
         XKit.log.logBusiness(`close: ${path}`)
         let comp = this._uiMap.get(path);
         comp?.close(() => {
+            let layer = comp._layer;
+            let bAuto = comp._bAuto;
+            //手动弹框关闭后通知 弹框管理器继续？
+            if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
+            {
+                this.onNonAutoPopupClosed?.();
+            }
             // 从已打开UI中移除
             this._uiMap.delete(path);
-            //使用缓存池 或者 不销毁 都放进池子里
+            //使用缓存池 || 不销毁 都放进池子里
             if (comp._usePool || !bDestory) {
                 
                 this.recycleToPool(comp);
@@ -248,13 +255,6 @@ export class LayerManager {
             else if (bDestory) {
                 // 强制销毁
                 comp.node.destroy();
-            }
-            let layer = comp._layer;
-            let bAuto = comp._bAuto;
-            //手动弹框关闭后通知 弹框管理器继续？
-            if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
-            {
-                this.onNonAutoPopupClosed?.();
             }
             callback?.()
         }, bSkipAnim)
