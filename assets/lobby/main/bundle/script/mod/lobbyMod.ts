@@ -1,7 +1,7 @@
 import { baseModule, HttpType } from '../../../../../script/XKit/module/baseModel';
 import { _decorator, Component, Node } from 'cc';
 import { PModuleID } from '../PModuleID';
-import { HttpReturn } from '../../../../../script/XKit/http/httpRequest';
+import { HttpReturn } from '../../../../../script/XKit/http/HttpRequest';
 import { XKit } from '../../../../../script/XKit/XKit';
 import { UIWaiting } from '../../../../../script/view/wait/UIWaiting';
 import { UIID } from '../../../../../script/XKit/GUI/UIConfig';

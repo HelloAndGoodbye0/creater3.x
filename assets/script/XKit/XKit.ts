@@ -2,7 +2,7 @@ import { AudioManager } from "./audio/AudioManager";
 import { EventManager } from "./event/EventManager";
 import { GUI } from "./GUI/GUI";
 import { PopupManager } from "./GUI/PopupManager";
-import { HttpRequest } from "./http/httpRequest";
+import { HttpRequest } from "./http/HttpRequest";
 import { Language } from "./language/Language";
 import { Logger } from "./log/Logger";
 import { ResLoader } from "./res/ResLoader";
