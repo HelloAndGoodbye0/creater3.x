@@ -1,4 +1,4 @@
-import { warn,_decorator} from "cc";
+import { warn, _decorator } from "cc";
 import { SpriteFrame } from "cc";
 import { settings } from "cc";
 import { Settings } from "cc";
@@ -18,18 +18,18 @@ export enum LanguageDefine {
     BN = "bn",//孟加拉语
     ID = "id",//印尼语
     AR = "ar",//阿拉伯语
-    MY="my",  //缅甸语
+    MY = "my",  //缅甸语
     MS = "ms", //马来语
 }
-const {executeInEditMode } = _decorator;
+const { executeInEditMode } = _decorator;
 @executeInEditMode
-export class Language  {
+export class Language {
 
-    private bundleMap:Map<string,boolean> = new Map<string,boolean>()
+    private bundleMap: Map<string, boolean> = new Map<string, boolean>()
     constructor() {
         let projectBundle = settings.querySettings(Settings.Category.ASSETS, 'projectBundles') || [];
         this.bundleMap.clear()
-        projectBundle.forEach((bundle:string)=>{
+        projectBundle.forEach((bundle: string) => {
             this.bundleMap.set(bundle, true)
         })
     }
@@ -39,21 +39,23 @@ export class Language  {
      * @param bundleName 
      * @returns 
      */
-    hasBundle(bundleName:string):boolean{
-        return this.bundleMap.has(bundleName)||false
+    hasBundle(bundleName: string): boolean {
+        return this.bundleMap.has(bundleName) || false
     }
 
     /**
      * 默认语言
      */
-    static DEFAULT_LANGUAGE:LanguageDefine = LanguageDefine.EN
+    static DEFAULT_LANGUAGE: LanguageDefine = LanguageDefine.EN
     /**
      * 当前语言
      */
     protected _currentLanguage: LanguageDefine = LanguageDefine.EN;
-
-    private _support: Array<LanguageDefine> = [ // 支持的语言
-        LanguageDefine.EN, 
+    /**
+     * 支持的语言
+     */
+    private _support: Array<LanguageDefine> = [
+        LanguageDefine.EN,
         LanguageDefine.PT,
         LanguageDefine.VI,
         LanguageDefine.THA,
@@ -63,11 +65,11 @@ export class Language  {
         LanguageDefine.AR,
         LanguageDefine.MY,
         LanguageDefine.MS
-    ];        
+    ];
 
 
     /** 设置多语言系统支持哪些语种 */
-    public set supportLanguages(supportLanguages: Array<LanguageDefine>) { 
+    public set supportLanguages(supportLanguages: Array<LanguageDefine>) {
         this._support = supportLanguages;
     }
 
@@ -84,7 +86,11 @@ export class Language  {
     public get languages(): LanguageDefine[] {
         return this._support;
     }
-
+    /**
+     * 某个语言是否支持
+     * @param lang 
+     * @returns 
+     */
     public isExist(lang: LanguageDefine): boolean {
         return this.languages.indexOf(lang) > -1;
     }
@@ -99,8 +105,8 @@ export class Language  {
         if (!language) {
             language = Language.DEFAULT_LANGUAGE;
         }
-        let index = this.languages.indexOf(language);
-        if (index < 0) {
+        let b = this.isExist(language);
+        if (!b) {
             warn(`当前不支持该语种" + language + " 将自动切换到 ${Language.DEFAULT_LANGUAGE} 语种!`);
             language = Language.DEFAULT_LANGUAGE;
         }
@@ -108,11 +114,11 @@ export class Language  {
             callback(false);
             return;
         }
-        
+
         XKit.log.logConfig(`当前语言为【${language}】`);
         callback(true);
-        
- 
+
+
     }
 
 
@@ -122,20 +128,20 @@ export class Language  {
      * @param id 
      * @param gameid 
      */
-    public  getLangByTag(id: string, gameid?:string|number): string {
-       const win: any = window;
+    public getLangByTag(id: string, gameid?: string | number): string {
+        const win: any = window;
         if (!win.languages) {
             return id;
         }
         let strDef = win.strDef[gameid][id]
 
-  
+
         let data = win.languages[this.current]?.[gameid]?.[strDef];
-        if(data==null)//尝试加载默认语言
+        if (data == null)//尝试加载默认语言
         {
             data = win.languages[Language.DEFAULT_LANGUAGE]?.[gameid]?.[strDef];
         }
-        return data || gameid+"-"+id;
+        return data || gameid + "-" + id;
     }
 
     /**
@@ -143,17 +149,17 @@ export class Language  {
      * @param labTag 
      * @returns 
      */
-    public  getLangByID( tag:string, gameid?:string|number ):string{
+    public getLangByID(tag: string, gameid?: string | number): string {
         const win: any = window;
         if (!win.languages) {
             return tag;
         }
         let data = win.languages[this.current]?.[gameid]?.[tag];
-        if(data==null)//尝试加载默认语言
+        if (data == null)//尝试加载默认语言
         {
             data = win.languages[Language.DEFAULT_LANGUAGE]?.[gameid]?.[tag];
         }
-        return data || gameid+"-"+tag;
+        return data || gameid + "-" + tag;
     }
 
     /**
@@ -161,7 +167,7 @@ export class Language  {
      * @param gameID 
      * @returns 
      */
-    public  getLangStrDef( gameID:number = 0):{[key:string]:string}{
+    public getLangStrDef(gameID: number = 0): { [key: string]: string } {
         const win = window as any
         return win.strDef[gameID]
     }
@@ -174,26 +180,26 @@ export class Language  {
      * @param bundleName    bundle名称
      * @param fileDir  自定义目录:默认为'content/sprite/lan'
      */
-    public  getLanSprite(resName:string,onComplete:(err,sprite:SpriteFrame)=>void,bundleName?:string | number,fileDir:string = 'content/sprite/lan' ){
-        var current =  this.current
+    public getLanSprite(resName: string, onComplete: (err, sprite: SpriteFrame) => void, bundleName?: string | number, fileDir: string = 'content/sprite/lan') {
+        var current = this.current
         let path = `${fileDir}/${current}/${resName}/spriteFrame`;
-        let name= bundleName?`${bundleName}_${current}`:"resources"
-        if(!EDITOR && !this.hasBundle(name)) //没有这个bundle 就去en加载
+        let name = bundleName ? `${bundleName}_${current}` : "resources"
+        if (!EDITOR && !this.hasBundle(name)) //没有这个bundle 就去en加载
         {
-            name = `${bundleName}_${LanguageDefine.EN}`
-            path = `${fileDir}/${LanguageDefine.EN}/${resName}/spriteFrame`;
+            name = `${bundleName}_${Language.DEFAULT_LANGUAGE}`
+            path = `${fileDir}/${Language.DEFAULT_LANGUAGE}/${resName}/spriteFrame`;
         }
-        XKit.res.load(name,path,SpriteFrame,(error, sprite:SpriteFrame)=>{
-            if(error){ //加载当前语言失败  尝试加载默认语言
-                
-                let defaultPath = `${fileDir}/${LanguageDefine.EN}/${resName}/spriteFrame`;
-                name = `${bundleName}_${LanguageDefine.EN}`
-                XKit.res.load(name,defaultPath,SpriteFrame,(error, sprite:SpriteFrame)=>{
-                    onComplete?.(error,sprite)
+        XKit.res.load(name, path, SpriteFrame, (error, sprite: SpriteFrame) => {
+            if (error) { //加载当前语言失败  尝试加载默认语言
+
+                let defaultPath = `${fileDir}/${Language.DEFAULT_LANGUAGE}/${resName}/spriteFrame`;
+                name = `${bundleName}_${Language.DEFAULT_LANGUAGE}`
+                XKit.res.load(name, defaultPath, SpriteFrame, (error, sprite: SpriteFrame) => {
+                    onComplete?.(error, sprite)
                 })
-                return 
+                return
             }
-            onComplete?.(error,sprite)
+            onComplete?.(error, sprite)
         })
 
     }
