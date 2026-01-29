@@ -3,6 +3,7 @@ import { EventManager } from "./event/EventManager";
 import { GUI } from "./GUI/GUI";
 import { PopupManager } from "./GUI/PopupManager";
 import { HttpRequest } from "./http/httpRequest";
+import { Language } from "./language/Language";
 import { Logger } from "./log/Logger";
 import { ResLoader } from "./res/ResLoader";
 import { StorageManager } from "./storage/StorageManager";
@@ -16,15 +17,17 @@ export  class XKit {
     // 全局资源加载器
     public static res:ResLoader = new ResLoader();
     /** 游戏音乐管理 */
-    static audio: AudioManager;
+    public static audio: AudioManager;
     /** 日志管理 */
-    static log = Logger;
+    public static log = Logger;
     /** 本地存储 */
-    static storage: StorageManager = new StorageManager();
+    public static storage: StorageManager = new StorageManager();
     /** 全局消息 */
-    static message: EventManager = EventManager.instance
+    public static message: EventManager = EventManager.instance
     /** 全局弹框管理 */
-    static popManager:PopupManager = null
+    public static popManager:PopupManager = null
     /** 全局http请求 */
-    static http:HttpRequest = new HttpRequest();
+    public static http:HttpRequest = new HttpRequest();
+    /** 全局语言管理 */
+    public static language: Language = new Language();
 }
