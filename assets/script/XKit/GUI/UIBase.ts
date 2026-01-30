@@ -193,20 +193,48 @@ export abstract class UIBase extends Component {
  
 
     //# region 事件监听
+    /**
+     * 监听事件
+     * @param name 
+     * @param callback 
+     * @param target 
+     */
      on(name:string,callback:Function,target:any)
      {
         XKit.message.on(name,callback,target)
      }
-
+     /**
+     * 监听一次事件
+     * @param name 
+     * @param callback 
+     * @param target 
+     */
      once(name:string,callback:Function,target:any)
      {
         XKit.message.once(name,callback,target)
      }
+     /**
+     * 移除事件监听
+     * @param name 
+     * @param callback 
+     * @param target 
+     */
      off(name:string,callback:Function,target:any)
      {
         XKit.message.off(name,callback,target)
      }
-
+     /**
+     * 移除所有事件监听
+     */
+     offAll()
+     {
+        XKit.message.targetOff(this)
+     }
+     /**
+     * 发送事件
+     * @param name 
+     * @param args 
+     */
      emit(name:string,...args:any)
      {
         XKit.message.emit(name,...args)
