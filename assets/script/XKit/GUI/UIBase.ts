@@ -119,7 +119,7 @@ export abstract class UIBase extends Component {
      * 页面刷新
      * @param arg 依赖参数
      */
-    refresh( args:any ){}
+    refresh( ...args:any ){}
 
     /**
      * 打开页面
