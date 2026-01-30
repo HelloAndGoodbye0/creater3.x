@@ -1,7 +1,7 @@
 // scripts/framework/ui/PopupManager.ts
 import { UIBase } from './UIBase';
 import { LayerManager } from './LayerManager';
-import { UIConfig} from './UIConfig';
+import { UIConfig } from './UIConfig';
 import { XKit } from '../XKit';
 
 /**
@@ -12,24 +12,19 @@ export interface IPopupConfig {
     uiConfig: UIConfig;
     /** 弹框关闭后的回调 */
     onClosed?: (result?: any) => void;
-    /** 优先级，数字越大优先级越高 */
-    priority?: number;
     /** 条件检查函数，返回true才弹出 */
     condition?: () => boolean;
-    /**弹出次数 */
-    popCount?: number; //弹出次数记录
-
+    /** 弹出次数 (每成功弹出并关闭一次减1，<=0时不弹出) */
+    popCount?: number; 
 }
 
 /**
- * 弹框管理器，用于管理大厅弹出一系列弹框
- * 基于GUI和UIBase，提供队列管理、优先级、条件检查等功能
+ * 弹框管理器
+ * 功能：队列管理、自动轮询、条件检查、暂停恢复
  */
 export class PopupManager {
-    /** 默认弹框优先级 */
-    private static readonly DEFAULT_PRIORITY = 0;
-    /** 队列处理时间间隔（毫秒） */
-    private static readonly QUEUE_PROCESS_INTERVAL = 5000;
+    /** 每一轮队列处理完成后的轮询间隔（毫秒） */
+    private static readonly ROUND_INTERVAL = 5000;
 
     /** GUI实例 */
     private gui: LayerManager;
@@ -37,84 +32,90 @@ export class PopupManager {
     private popupQueue: IPopupConfig[] = [];
     /** 当前显示的弹框 */
     private currentPopup: UIBase | null = null;
-    /** 弹框队列处理中 */
-    private isProcessing: boolean = false;
-    /** 队列处理定时器 */
-    private popInterval: NodeJS.Timeout | null = null;
-    /** 自动弹框是否暂停 */
+    
+    /** 状态控制 */
     private isPaused: boolean = false;
-    /** 当前处理的队列索引，供恢复时继续 */
+    private isProcessing: boolean = false; // 是否正在处理弹框流程中（含等待时间）
+    
+    /** 流程游标与计时器 */
     private currentQueueIndex: number = 0;
-    /** 2个弹框之间的间隔(毫秒) */
-    private delayTime: number = 0;
+    private timer: NodeJS.Timeout | null = null; // 复用计时器（用于弹框间隔 或 轮询间隔）
+    private delayTime: number = 0; // 两个弹框之间的间隔(毫秒)
 
     constructor(gui: LayerManager) {
         this.gui = gui;
-        // 订阅GUI事件
+        // 监听GUI层事件，当有非自动弹框（如手动打开的界面）打开时暂停自动弹框，关闭时恢复
         this.gui.onNonAutoPopupOpened = () => this.pause();
         this.gui.onNonAutoPopupClosed = () => this.resume();
     }
 
-
     //#region 外部调用
+
     /**
      * 添加弹框到队列
      * @param config 弹框配置
-     * @param isFront 是否插入队列最前面
-     * @param isImmediate 是否立即弹出（跳过队列直接显示）
+     * @param isFront 是否插入到队列最前面
      */
-    addPopup(config: IPopupConfig, isFront?: boolean, isImmediate?: boolean): void {
-        // 如果立即弹出，直接显示该弹框
-        if (isImmediate) {
-            //关闭当前已经打开了的弹框？
-            this._closeCurrentPopup();
-
-            this.showPopup(config);
-            
-            return;
-        }
-
+    addPopup(config: IPopupConfig, isFront: boolean = false): void {
         if (isFront) {
             this.popupQueue.unshift(config);
-            return;
+            // 如果插入到最前且当前正在处理后面的，需要调整索引以保持逻辑正确
+            // 但为了简化，这里不做索引偏移，新加入的会在下一轮轮询或重置时生效
+            // 或者如果当前处于 Idle 状态，它会被立即捕获
+        } else {
+            this.popupQueue.push(config);
         }
 
-        const priority = config.priority ?? PopupManager.DEFAULT_PRIORITY;
-        const insertIndex = this.popupQueue.findIndex(
-            item => (item.priority ?? PopupManager.DEFAULT_PRIORITY) < priority
-        );
-        const targetIndex = insertIndex === -1 ? this.popupQueue.length : insertIndex;
-        this.popupQueue.splice(targetIndex, 0, config);
-    }
-
-    /**
-     * 开始处理弹框队列
-     */
-    startPopup(): void {
-        this.processQueue();
-        this.popInterval = setInterval(
-            () => this.processQueue(),
-            PopupManager.QUEUE_PROCESS_INTERVAL
-        );
-    }
-    /**
-     * 停止处理弹框队列
-     */
-    stopPopup(): void {
-        if (this.popInterval) {
-            clearInterval(this.popInterval);
-            this.popInterval = null;
+        // 如果当前没有在处理流程中，且未暂停，尝试激活流程
+        if (!this.isProcessing && !this.isPaused) {
+            this.tryProcessNext();
         }
     }
+
     /**
      * 批量添加弹框
-     * @param configs 弹框配置数组
      */
     addPopups(configs: IPopupConfig[]): void {
         configs.forEach(config => this.addPopup(config));
     }
 
+    /**
+     * 暂停自动弹框
+     * 说明：关闭当前自动弹出的弹框，停止计时器，保留当前队列索引
+     */
+    pause(): void {
+        if (this.isPaused) return;
+        this.isPaused = true;
+        XKit.log.logBusiness("PopupManager Paused");
 
+        // 1. 清理计时器（可能是轮询等待，也可能是弹框间隔等待）
+        this.clearTimer();
+
+        // 2. 关闭当前正在显示的自动弹框
+        if (this.currentPopup) {
+            // 注意：关闭会触发 onClose 回调，我们在 onClose 里做了状态判断阻止继续执行
+            this.gui.close(this.currentPopup._url);
+            this.currentPopup = null;
+        }
+
+        // 3. 标记不再处理中
+        this.isProcessing = false;
+    }
+
+    /**
+     * 恢复自动弹框
+     * 说明：从暂停时的索引位置继续执行
+     */
+    resume(): void {
+        if (!this.isPaused) return;
+        this.isPaused = false;
+        XKit.log.logBusiness("PopupManager Resumed");
+
+        // 恢复时，如果当前未在处理，立即尝试处理当前索引的弹框
+        if (!this.isProcessing) {
+            this.tryProcessNext();
+        }
+    }
 
     /**
      * 获取当前弹框
@@ -124,172 +125,184 @@ export class PopupManager {
     }
 
     /**
-     * 检查队列是否为空
-     */
-    isQueueEmpty(): boolean {
-        return this.popupQueue.length === 0;
-    }
-
-    /**
-     * 清空弹框队列
+     * 清空并重置
      */
     clear(): void {
-        this._closeCurrentPopup();
+        this.pause(); // 先暂停清理现场
         this.popupQueue = [];
-        this.isProcessing = false;
         this.currentQueueIndex = 0;
+        this.isPaused = false; // 重置暂停状态
+        this.isProcessing = false;
     }
-    // #endregion
+
+    //#endregion
+
+    //#region 核心流程控制
 
     /**
-     * 关闭当前弹框
+     * 尝试处理队列中的下一个
+     * 这是一个递归驱动的异步链
      */
-    protected _closeCurrentPopup()
-    {
-        if(this.currentPopup)
-        {
-            this.gui.close(this.currentPopup._url)
-            this.currentPopup = null;
-        }
-    }
-    /**
-     * 处理弹框队列
-     */
-    private async processQueue(): Promise<void> {
-        // 如果暂停或没有队列，不处理
-        if (this.isPaused || this.isProcessing || this.popupQueue.length === 0) {
+    private async tryProcessNext(): Promise<void> {
+        // 1. 基础拦截
+        if (this.isPaused) return;
+
+        this.isProcessing = true;
+
+        // 2. 队列轮询结束检查
+        if (this.currentQueueIndex >= this.popupQueue.length) {
+            this.handleRoundComplete();
             return;
         }
 
-        this.isProcessing = true;
-        try {
-            // 从当前索引开始处理，支持恢复后继续
-            for (let i = this.currentQueueIndex; i < this.popupQueue.length; i++) {
-                const config = this.popupQueue[i];
-                
-                // 处理中再次检查暂停状态
-                if (this.isPaused) {
-                    this.currentQueueIndex = i; // 记录中断位置
-                    break;
-                }
+        // 3. 获取配置
+        const config = this.popupQueue[this.currentQueueIndex];
 
-                if(config.popCount>0)
-                {
-                    await this.showPopup(config);
-                    //更新次数
-                    config.popCount =  config.popCount - 1;
-                    //有弹框间隔 && 间隔不算最后一个
-                    if (this.delayTime > 0 && i<(this.popupQueue.length-1)) {
-                        await this.delay(this.delayTime);
-                    }
-                }
-     
+        // 4. 预检查：次数耗尽 (Skip)
+        if ((config.popCount ?? 0) <= 0) {
+            // 次数没了，直接跳下一个
+            this.currentQueueIndex++;
+            this.tryProcessNext();
+            return;
+        }
+
+        // 5. 预检查：条件不满足 (Skip)
+        if (config.condition && !config.condition()) {
+            // 条件不满足，跳下一个
+            XKit.log.logBusiness(config.uiConfig, "Condition false, skipping");
+            this.currentQueueIndex++;
+            this.tryProcessNext();
+            return;
+        }
+
+        // 6. 执行弹出
+        const isShown = await this.showPopup(config);
+
+        if (isShown) {
+            // 成功显示，扣除次数
+            if (config.popCount) {
+                config.popCount--;
             }
-            // 整个队列处理完成，过滤掉次数已用完的弹框
-            if (!this.isPaused) {
-                this.popupQueue = this.popupQueue.filter(config => (config.popCount ?? 0) > 0);
-                this.currentQueueIndex = 0; // 正常情况下重置索引
-            }
-        } finally {
-            this.isProcessing = false;
+            // 此时流程暂停，等待弹框关闭回调 (onPopupClosed) 来驱动下一步
+        } else {
+            // 显示失败（可能被抢占或资源加载失败），直接处理下一个
+            this.currentQueueIndex++;
+            this.tryProcessNext();
         }
     }
 
-    
     /**
-     * 延迟方法
+     * 处理一轮结束
      */
-    private delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    private handleRoundComplete(): void {
+        // 过滤掉次数用完的 (可选优化，避免数组无限膨胀)
+        this.popupQueue = this.popupQueue.filter(c => (c.popCount ?? 0) > 0);
+
+        // 如果队列为空，直接结束处理状态，等待下一次 addPopup 唤醒
+        if (this.popupQueue.length === 0) {
+            this.isProcessing = false;
+            this.currentQueueIndex = 0;
+            return;
+        }
+
+        // 进入轮询等待期
+        XKit.log.logBusiness(`Round complete. Waiting ${PopupManager.ROUND_INTERVAL}ms...`);
+        
+        this.clearTimer();
+        this.timer = setTimeout(() => {
+            this.timer = null;
+            if (!this.isPaused) {
+                // 倒计时结束，重置索引，开始新的一轮
+                this.currentQueueIndex = 0;
+                this.tryProcessNext();
+            }
+        }, PopupManager.ROUND_INTERVAL);
     }
+
     /**
-     * 显示单个弹框
+     * 显示弹框逻辑
      */
-    private async showPopup(config: IPopupConfig): Promise<void> {
+    private async showPopup(config: IPopupConfig): Promise<boolean> {
+        // 安全检查
+        if (this.currentPopup) return false;
+        if (this.isPaused) return false;
+
         try {
-            // 检查条件
-            if (config.condition && !config.condition()) {
-                XKit.log.logBusiness(config.uiConfig, "condition not met");
-                return;
-            }
-
-            // 检查次数
-            if ((config.popCount ?? 0) <= 0) {
-                XKit.log.logBusiness(config.uiConfig, "popCount<=0 uid:");
-                return;
-            }
-
-            if (this.currentPopup) {
-                XKit.log.logBusiness(config.uiConfig, "currentPopup!=null");
-                return;
-            }
-
-            // 打开弹框 需要设置bAuto为true 使用浅拷贝
-            let uiConfig = {...config.uiConfig}
+            // 浅拷贝配置，强制设为自动模式
+            const uiConfig = { ...config.uiConfig };
             uiConfig.bAuto = true;
+
             const popup = await this.gui.open<UIBase>(uiConfig);
-            if (!popup) {
-                XKit.log.logBusiness(`Failed to open popup: ${config.uiConfig}`);
-                return;
-            }
-            if(this.isPaused)
-            {
-                XKit.log.logBusiness(`Popup ${config.uiConfig} is paused.`);
+
+            // 再次检查（防止await期间被暂停）
+            if (!popup) return false;
+            if (this.isPaused) {
                 this.gui.close(popup._url);
-                return 
+                return false;
             }
 
             this.currentPopup = popup;
 
+            // 刷新参数
             if (uiConfig.args) {
                 popup.refresh(uiConfig.args);
             }
 
-            // 创建等待弹框关闭的Promise
-            return new Promise<void>((resolve) => {
-                const originalClose = popup.close.bind(popup);
-                popup.close = (callback?: Function, bSkipAnim?: boolean) => {
-                    originalClose(() => {
-                        this.onPopupClosed(config.onClosed);
-                        callback?.();
-                        resolve(); // 弹框关闭时resolve Promise
-                        popup.close = originalClose; // 恢复原始close方法
-                    }, bSkipAnim);
-                };
-            });
-        } catch (error) {
-            XKit.log.logBusiness(config.uiConfig, `Error showing popup: ${error}`);
+            // --- 核心：劫持 Close 方法以驱动队列 ---
+            const originalClose = popup.close.bind(popup);
+            
+            popup.close = (callback?: Function, bSkipAnim?: boolean) => {
+                originalClose(() => {
+                    // 1. 业务回调
+                    config.onClosed?.();
+                    callback?.();
+
+                    // 2. 恢复引用
+                    popup.close = originalClose;
+                    this.currentPopup = null;
+
+                    // 3. 驱动下一步
+                    this.onPopupClosed();
+                }, bSkipAnim);
+            };
+
+            return true;
+
+        } catch (e) {
+            XKit.log.logBusiness(config.uiConfig, `Show Error: ${e}`);
+            return false;
         }
     }
 
     /**
-     * 弹框关闭回调
+     * 弹框关闭后的处理
      */
-    private onPopupClosed(onClosed?: (result?: any) => void): void {
-        this.currentPopup = null;
-        onClosed?.();
-    }
-
-    /**
-     * 暂停自动弹框处理
-     */
-    private pause(): void {
-        if (!this.isPaused) {
-            this.isPaused = true;
-            this._closeCurrentPopup();
-            XKit.log.logBusiness( "PopupManager pause");
-        }
-    }
-
-    /**
-     * 恢复自动弹框处理
-     */
-    private resume(): void {
+    private onPopupClosed(): void {
         if (this.isPaused) {
-            this.isPaused = false;
-            // 立即触发一次队列处理，从中断位置继续
-            this.processQueue();
-            XKit.log.logBusiness( "PopupManager resume");
+            this.isProcessing = false;
+            return;
+        }
+
+        // 索引指向下一个
+        this.currentQueueIndex++;
+
+        // 处理间隔时间
+        if (this.delayTime > 0) {
+            this.timer = setTimeout(() => {
+                this.timer = null;
+                this.tryProcessNext();
+            }, this.delayTime);
+        } else {
+            this.tryProcessNext();
         }
     }
+
+    private clearTimer(): void {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+    }
+
+    //#endregion
 }

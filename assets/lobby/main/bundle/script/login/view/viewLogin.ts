@@ -99,7 +99,6 @@ export class viewLogin extends UIBase {
                 console.log("弹框3关闭了")
             }
         })
-        XKit.popManager.startPopup();
     }
     protected clickEvent(event: Event) {
         this.emit(ConstEventDefine.TEST, { "name": "Lee123" })
