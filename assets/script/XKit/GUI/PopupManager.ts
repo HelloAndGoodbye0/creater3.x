@@ -67,11 +67,7 @@ export class PopupManager {
         // 如果立即弹出，直接显示该弹框
         if (isImmediate) {
             //关闭当前已经打开了的弹框？
-            if(this.currentPopup!=null)
-            {
-                this.gui.close(this.currentPopup._url)
-                this.currentPopup = null;
-            }
+            this._closeCurrentPopup();
 
             this.showPopup(config);
             
@@ -138,17 +134,24 @@ export class PopupManager {
      * 清空弹框队列
      */
     clear(): void {
-        if(this.currentPopup)
-        {
-            this.gui.close(this.currentPopup._url)
-        }
-        this.currentPopup = null;
+        this._closeCurrentPopup();
         this.popupQueue = [];
         this.isProcessing = false;
         this.currentQueueIndex = 0;
     }
     // #endregion
 
+    /**
+     * 关闭当前弹框
+     */
+    protected _closeCurrentPopup()
+    {
+        if(this.currentPopup)
+        {
+            this.gui.close(this.currentPopup._url)
+            this.currentPopup = null;
+        }
+    }
     /**
      * 处理弹框队列
      */
@@ -222,7 +225,7 @@ export class PopupManager {
             }
 
             // 打开弹框 需要设置bAuto为true 使用浅拷贝
-            let uiConfig = config.uiConfig
+            let uiConfig = {...config.uiConfig}
             uiConfig.bAuto = true;
             const popup = await this.gui.open<UIBase>(uiConfig);
             if (!popup) {
@@ -273,10 +276,7 @@ export class PopupManager {
     private pause(): void {
         if (!this.isPaused) {
             this.isPaused = true;
-            if(this.currentPopup){
-                this.gui.close(this.currentPopup._url);
-                this.currentPopup = null;
-            }
+            this._closeCurrentPopup();
             XKit.log.logBusiness( "PopupManager pause");
         }
     }
