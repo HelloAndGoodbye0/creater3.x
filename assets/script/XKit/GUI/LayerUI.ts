@@ -26,13 +26,14 @@ export class LayerUI extends Node {
         let comp = this._uiMap.get(path);
         XKit.log.logBusiness(`close: ${path}`)
         comp?.close(() => {
-           
             this._uiMap.delete(path);
             //使用缓存池 || 不销毁 都放进池子里
             if (comp._usePool || !bDestory) {
+                console.log(`recycleToPool: ${path}`);
                 this.recycleToPool(comp);
             }
             else if (bDestory) {
+                console.log("销毁UI:", path);
                 // 强制销毁
                 comp.node.destroy();
             }
