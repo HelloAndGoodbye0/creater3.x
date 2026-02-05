@@ -21,11 +21,17 @@ export class UIToast extends UIBase {
     refresh(str: string): void {
         this.label.string = str;
         utils.playAnimation(this.aniToast, "notify",this,()=>{
-            XKit.gui.close(this._url)
+          
+            this.playAniEnd()
         });
 
     }
-
+    /**
+     * 播放动画完毕
+     */
+    protected playAniEnd(): void {
+        this.node.destroy();
+    }
 
 }
 

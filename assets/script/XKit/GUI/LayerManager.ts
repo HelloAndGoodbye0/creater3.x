@@ -2,119 +2,66 @@
 import { _decorator, Node, Prefab, resources, instantiate, Widget, error, } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
-import { UIConfig } from './UIConfig';
+import { baseUIConfig, UIConfig, UID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
 import { UIMsgBox, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
+import { LayerUI } from './LayerUI';
+import { LayerPopup } from './LayerPopup';
+import { LayerDialog } from './LayerDialog';
+import { LayerToast } from './LayerToast';
+import { LayerWaiting } from './LayerWaiting';
+import { LayerNotify } from './LayerNotify';
 
 const { ccclass } = _decorator;
+/**
+ * 层级对应的节点类
+ */
+const Layer2Class = {
+    [UILayer.Game]: LayerUI,
+    [UILayer.UI]: LayerUI,
+    [UILayer.PopUp]: LayerPopup,
+    [UILayer.Dialog]: LayerDialog,
+    [UILayer.Waiting]: LayerWaiting,
+    [UILayer.Notify]: LayerNotify,
+    [UILayer.Toast]: LayerToast,
+    [UILayer.Guide]: LayerUI,
+
+}
 
 @ccclass('LayerManager')
 export class LayerManager {
 
     /** 存储层级节点的 Map*/
-    private _layerMap: Map<UILayer, Node> = new Map();
-    /**已经打开的UI组件缓存 <路径, 组件实例数组> */
-    private _uiMap: Map<string, UIBase> = new Map();
-    /**预制缓存 <路径, Prefab> */
-    private _prefabCache: Map<string, Prefab> = new Map();
+    private _layerMap: Map<UILayer, LayerUI> = new Map();
+
     /**ui根节点 */
     private _root: Node = null;
-    /**UI 对象池 <路径, UIBase组件数组>*/
-    protected uiPool: Map<string, UIBase[]> = new Map()
-    /**同一种类 UI 池的最大数量 */
-    protected poolSize: number = 8
+
     /**非自动弹框打开回调*/
     public onNonAutoPopupOpened?: () => void;
     /**非自动弹框关闭回调*/
     public onNonAutoPopupClosed?: () => void;
 
-
-
     /**
-     * 内部加载器封装
+     * UI 配置表
      */
-    private _loadResource<T>(path: string, bundleName: string): Promise<T> {
-        return new Promise((resolve, reject) => {
-
-            if (bundleName == "resources") {
-                resources.load(path, Prefab, (err, asset) => {
-                    if (err) {
-                        resolve(null);
-                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
-                    }
-                    else {
-                        resolve(asset as any);
-                    }
-                });
-            }
-            else {
-                XKit.res.load(bundleName, path, Prefab, (err, asset) => {
-                    if (err) {
-                        resolve(null);
-                        XKit.log.logBusiness(`loadResource error ${path} ${bundleName}`)
-                    }
-                    else {
-                        resolve(asset as any);
-                    }
-                })
-            }
-        });
-    }
+    _uiConfig:Map<number, UIConfig> = new Map()
 
 
 
     /**
-     * 从对象池获取UI组件
-     * @param path 
-     * @returns 
+     * 注册 UI 配置
+     * @param ID 
+     * @param config 
      */
-    protected getPoolByPath(path: string): UIBase[] {
-        return this.uiPool.get(path) || []
-    }
-
-    /**
-     * 设置UI组件属性并添加到映射表
-     * @param comp UI组件
-     * @param uniqueKey 唯一键
-     * @param config UI配置
-
-     */
-    private _setupUIComponent(comp: UIBase, uniqueKey: string, config:UIConfig): void {
-        comp._url = uniqueKey;
-        comp._usePool = config.usePool;
-        comp._layer = config.layer;
-        comp._bAuto = config.bAuto || false;
-        this._uiMap.set(uniqueKey, comp);
-        // 设置层级
-        comp.node.setSiblingIndex(-1);
-    }
-
-    /**
-     * 回收UI组件到对象池
-     * @param comp 
-     */
-    protected recycleToPool(comp: UIBase) {
-        let key = comp._url.indexOf("_")>-1? comp._url.split("_")[0]: comp._url
-        let arr = this.uiPool.get(key)
-        if (!arr) {
-            arr = []
-            arr.push(comp)
+    reigster(ID:number,config:UIConfig){
+        if(this._uiConfig.has(ID)){
+            XKit.log.logBusiness(`reigster ID:${ID} 重复注册`);
         }
-        else {
-            if (arr.length >= this.poolSize) {
-                //超出池子大小，直接销毁
-                comp.node.destroy()
-                return
-            } else {
-                arr.push(comp)
-            }
-        }
-        this.uiPool.set(key, arr)
-
+        this._uiConfig.set(ID,config)
     }
 
-    //#region 外部调用
 
     /**
      * 初始化 UI 根节点和层级
@@ -126,11 +73,9 @@ export class LayerManager {
         this._layerMap.clear();
 
         // 遍历枚举，创建对应的层级节点
-        const keys = Object.keys(UILayer).filter(k => typeof UILayer[k as any] === "number");
+        const keys = Object.keys(UILayer)
         for (const key of keys) {
-            const layerIndex = Number(UILayer[key as any]);
-            const layerNode = new Node(key);
-
+            const layerNode = new Layer2Class[key](key);
             // 添加 Widget 使得层级节点撑满屏幕
             const widget = layerNode.addComponent(Widget);
             widget.isAlignTop = widget.isAlignBottom = widget.isAlignLeft = widget.isAlignRight = true;
@@ -138,91 +83,39 @@ export class LayerManager {
 
             // 统一管理层级节点挂载
             this._root.addChild(layerNode);
-            this._layerMap.set(layerIndex, layerNode);
+            this._layerMap.set(key as UILayer, layerNode);
         }
+
+        //注册基础UI
+        for (const key in baseUIConfig) {
+            const config = baseUIConfig[key];
+            this.reigster(Number(key), config);
+        }
+
     }
 
 
     /**
-     * 异步打开 UI
-     * @param path Prefab 路径 (Resources下)
-     * @param layer UI 层级
-     * @param args 传递给 UI 的参数
-     * @returns Promise<T> 返回对应的组件实例
+     * 同步方式打开UI
+     * @param ID 
+     * @param args 
+     * @param bAuto 
+     * @returns 
      */
-    public async open<T extends UIBase>(data: UIConfig ): Promise<T | null> {
+    public async open<T extends UIBase>(ID:number, args?: any,bAuto?: boolean): Promise<T | null> {
+        let config = this._uiConfig.get(ID)
+        if(!config){
+            XKit.log.logBusiness(`open ID:${ID} 未注册`);
+            return null
+        }
+        config.args = args
+        config.bAuto = bAuto||false
 
-        let path = data.prefab
-        let layer = data?.layer || UILayer.UI
-        let args = data?.args || {}
-        let bundleName = data?.bundle || "resources"
-        let bAuto = data?.bAuto || false
-        let usePool = data?.usePool || false
-
-        if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
-        {
+        let  layerNode = this._layerMap.get(config?.layer || UILayer.UI); 
+        if (!bAuto && (config.layer == UILayer.PopUp || config.layer == UILayer.Dialog)) {
             this.onNonAutoPopupOpened?.();
         }
-        XKit.log.logBusiness(args,`open: ${path}`)
-        // 1. 检查是否已经打开
-        if (this._uiMap.has(path)) {
-            let comp = this._uiMap.get(path)
-            comp.show()
-            comp.refresh(args)
-            return comp as T;
-        }
-
-        // 2 尝试从池中获取
-        let pool = this.getPoolByPath(path)
-        let cacheComp = pool?.pop() as T
-        if (cacheComp) {
-            cacheComp.show()
-            cacheComp.refresh(args)
-            //使用缓存池设置唯一的key
-            let uniqueKey = `${path}_${Date.now()}`
-            this._setupUIComponent(cacheComp, uniqueKey, data);
-            return cacheComp;
-        }
-
-        // 3. 加载资源 (优先从缓存获取)
-        let prefab = this._prefabCache.get(path);
-        if (!prefab) {
-            prefab = await this._loadResource<Prefab>(path, bundleName);
-            if (prefab) {
-                this._prefabCache.set(path, prefab);
-            }
-            else {
-                error(`Failed to load UI: ${path}`);
-                return null;
-            }
-        }
-
-        // 4. 实例化
-        const node = instantiate(prefab);
-        const comp = node.getComponent(UIBase);
-        if (!comp) {
-            error(`Prefab at ${path} does not have UIBase component!`);
-            node.destroy();
-            return null;
-        }
-
-        // 5. 使用缓存池设置唯一的key
-        let uniqueKey = usePool ? `${path}_${Date.now()}`: path;
-        this._setupUIComponent(comp, uniqueKey, data);
-      
-
-        // 6. 添加到指定层级
-        const layerNode = this._layerMap.get(layer);
-        if (layerNode) {
-            layerNode.addChild(node);
-        } else {
-            this._root.addChild(node); // 降级处理
-        }
-
-        // 7.显示刷新
-        comp.show()
-        comp.refresh(args)
-        return comp as T;
+        return await layerNode.add(config)
     }
 
     /**
@@ -232,34 +125,23 @@ export class LayerManager {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(path: string, bDestory:boolean = false, bSkipAnim: boolean = false, callback?: Function): void {
-        if(path?.length==0)
-        {
-            return 
+    public close(ID:number,bDestory:boolean = false,bSkipAnim:boolean = false,callback?:(com:UIBase)=>void): void {
+        let config = this._uiConfig.get(ID)
+        if(!config){
+            XKit.log.logBusiness(`close ID:${ID} 未注册`);
+            return
         }
-        XKit.log.logBusiness(`close: ${path}`)
-        let comp = this._uiMap.get(path);
-        comp?.close(() => {
-            let layer = comp._layer;
-            let bAuto = comp._bAuto;
+        let  layerNode = this._layerMap.get(config?.layer || UILayer.UI);
+        layerNode.remove(config,bDestory,bSkipAnim,(_com:UIBase)=>{
+            let layer = _com._layer;
+            let bAuto = _com._bAuto;
             //手动弹框关闭后通知 弹框管理器继续？
             if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
             {
                 this.onNonAutoPopupClosed?.();
             }
-            // 从已打开UI中移除
-            this._uiMap.delete(path);
-            //使用缓存池 || 不销毁 都放进池子里
-            if (comp._usePool || !bDestory) {
-                
-                this.recycleToPool(comp);
-            }
-            else if (bDestory) {
-                // 强制销毁
-                comp.node.destroy();
-            }
-            callback?.()
-        }, bSkipAnim)
+            callback?.(_com)
+        })
     }
 
     /**
@@ -270,9 +152,7 @@ export class LayerManager {
      * @param right 
      */
     async showMsgBox(data: MsgBoxData) {
-        let config:UIConfig= { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true }
-        config.args = data
-        this.open<UIMsgBox>(config)
+        this.open<UIToast>(UID.MsgBox, data)
 
     }
 
@@ -283,9 +163,7 @@ export class LayerManager {
      * @param useI18n 是否使用多语言
      */
     async toast(content: string) {
-        let config:UIConfig = { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: true }
-        config.args = content
-        this.open<UIToast>(config)
+        this.open<UIToast>(UID.Toast, content)
     }
 
 

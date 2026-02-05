@@ -104,9 +104,8 @@ export abstract class UIBase extends Component {
             })
         }
     }
-
     /** 资源路径（由管理器赋值） */
-    public _url: string = "";
+    public _prefab: string = "";
     /** 是否使用对象池 */
     public _usePool: boolean = false;
     /** 属于哪个界面层 */

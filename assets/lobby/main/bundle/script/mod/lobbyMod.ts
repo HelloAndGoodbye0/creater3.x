@@ -74,15 +74,15 @@ export class lobbyMod extends baseModule {
     protected _waiting: UIWaiting = null;
     protected async showLoading(b:boolean)
     {
-        if(b)
-        {
-           let config = { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" }
-           this._waiting = await XKit.gui.open<UIWaiting>(config)
-        }
-        else
-        {
-            XKit.gui.close(this._waiting._url)
-        }
+        // if(b)
+        // {
+        //    let config = { layer: UILayer.Waiting, prefab: "prefabs/loadingNode", bundle: "resources" }
+        //    this._waiting = await XKit.gui.open<UIWaiting>(config)
+        // }
+        // else
+        // {
+        //     XKit.gui.close(this._waiting._url)
+        // }
     }
     //## endregion
 

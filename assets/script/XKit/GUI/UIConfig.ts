@@ -21,4 +21,24 @@ export interface UIConfig {
 }
 
 
+/**
+ * 基础UI配置 从0开始
+ */
+export enum UID {
+    /**
+     * 弹窗
+     */
+    MsgBox = 0,
+    /**
+     * 浮动文字
+     */
+    Toast,
+
+}
+
+
+export var baseUIConfig: { [key: number]: UIConfig } = {
+    [UID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
+    [UID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: false }
+}
 

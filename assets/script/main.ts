@@ -11,7 +11,6 @@ import { PopupManager } from './XKit/GUI/PopupManager';
 
 
 
-
 @ccclass('main')
 export class main extends UIBase {
 

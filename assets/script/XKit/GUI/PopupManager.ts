@@ -1,15 +1,16 @@
 // scripts/framework/ui/PopupManager.ts
 import { UIBase } from './UIBase';
 import { LayerManager } from './LayerManager';
-import { UIConfig } from './UIConfig';
 import { XKit } from '../XKit';
 
 /**
  * 弹框配置接口
  */
 export interface IPopupConfig {
-    /** UIConfig */
-    uiConfig: UIConfig;
+    /** uid */
+    uid: number;
+    /** 参数 */
+    args?:any;
     /** 弹框关闭后的回调 */
     onClosed?: (result?: any) => void;
     /** 条件检查函数，返回true才弹出 */
@@ -92,11 +93,11 @@ export class PopupManager {
         this.clearTimer();
 
         // 2. 关闭当前正在显示的自动弹框
-        if (this.currentPopup) {
+        // if (this.currentPopup) {
             // 注意：关闭会触发 onClose 回调，我们在 onClose 里做了状态判断阻止继续执行
-            this.gui.close(this.currentPopup._url);
-            this.currentPopup = null;
-        }
+            // this.gui.close(this.currentPopup._url);
+            // this.currentPopup = null;
+        // }
 
         // 3. 标记不再处理中
         this.isProcessing = false;
@@ -113,7 +114,7 @@ export class PopupManager {
 
         // 恢复时，如果当前未在处理，立即尝试处理当前索引的弹框
         if (!this.isProcessing) {
-            this.tryProcessNext();
+            this.tryProcessNext(true);
         }
     }
 
@@ -143,7 +144,7 @@ export class PopupManager {
      * 尝试处理队列中的下一个
      * 这是一个递归驱动的异步链
      */
-    private async tryProcessNext(): Promise<void> {
+    private async tryProcessNext(bResume:boolean = false): Promise<void> {
         // 1. 基础拦截
         if (this.isPaused) return;
 
@@ -151,7 +152,7 @@ export class PopupManager {
 
         // 2. 队列轮询结束检查
         if (this.currentQueueIndex >= this.popupQueue.length) {
-            this.handleRoundComplete();
+            this.handleRoundComplete(bResume);
             return;
         }
 
@@ -169,7 +170,7 @@ export class PopupManager {
         // 5. 预检查：条件不满足 (Skip)
         if (config.condition && !config.condition()) {
             // 条件不满足，跳下一个
-            XKit.log.logBusiness(config.uiConfig, "Condition false, skipping");
+            XKit.log.logBusiness(config.uid, "Condition false, skipping");
             this.currentQueueIndex++;
             this.tryProcessNext();
             return;
@@ -194,7 +195,7 @@ export class PopupManager {
     /**
      * 处理一轮结束
      */
-    private handleRoundComplete(): void {
+    private handleRoundComplete(bResume:boolean): void {
         // 过滤掉次数用完的 (可选优化，避免数组无限膨胀)
         this.popupQueue = this.popupQueue.filter(c => (c.popCount ?? 0) > 0);
 
@@ -207,16 +208,24 @@ export class PopupManager {
 
         // 进入轮询等待期
         XKit.log.logBusiness(`Round complete. Waiting ${PopupManager.ROUND_INTERVAL}ms...`);
+        if(bResume) //恢复时，直接重置索引，开始新的一轮
+        {
+            this.currentQueueIndex = 0;
+            this.tryProcessNext();
+        }
+        else//延时
+        { 
+            this.clearTimer();
+            this.timer = setTimeout(() => {
+                this.timer = null;
+                if (!this.isPaused) {
+                    // 倒计时结束，重置索引，开始新的一轮
+                    this.currentQueueIndex = 0;
+                    this.tryProcessNext();
+                }
+            }, PopupManager.ROUND_INTERVAL);
+        }
         
-        this.clearTimer();
-        this.timer = setTimeout(() => {
-            this.timer = null;
-            if (!this.isPaused) {
-                // 倒计时结束，重置索引，开始新的一轮
-                this.currentQueueIndex = 0;
-                this.tryProcessNext();
-            }
-        }, PopupManager.ROUND_INTERVAL);
     }
 
     /**
@@ -228,25 +237,14 @@ export class PopupManager {
         if (this.isPaused) return false;
 
         try {
-            // 浅拷贝配置，强制设为自动模式
-            const uiConfig = { ...config.uiConfig };
-            uiConfig.bAuto = true;
-
-            const popup = await this.gui.open<UIBase>(uiConfig);
-
+            const popup = await this.gui.open<UIBase>(config.uid,config.args,true);
             // 再次检查（防止await期间被暂停）
             if (!popup) return false;
             if (this.isPaused) {
-                this.gui.close(popup._url);
+                this.gui.close(config.uid);
                 return false;
             }
-
             this.currentPopup = popup;
-
-            // 刷新参数
-            if (uiConfig.args) {
-                popup.refresh(uiConfig.args);
-            }
 
             // --- 核心：劫持 Close 方法以驱动队列 ---
             const originalClose = popup.close.bind(popup);
@@ -269,7 +267,7 @@ export class PopupManager {
             return true;
 
         } catch (e) {
-            XKit.log.logBusiness(config.uiConfig, `Show Error: ${e}`);
+            XKit.log.logBusiness(config.uid, `Show Error: ${e}`);
             return false;
         }
     }

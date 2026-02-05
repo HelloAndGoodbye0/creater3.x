@@ -6,7 +6,7 @@ import { utils } from '../../../../../../script/XKit/utils/utils';
 import { XKit } from '../../../../../../script/XKit/XKit';
 import { tutorial } from 'pb_framework';
 import { ConstEventDefine } from '../../config/ConstEventDefine';
-import { UILayer } from '../../../../../../script/XKit/GUI/UILayer';
+import { UID } from '../../../../../../script/XKit/GUI/UIConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('viewLogin')
@@ -44,40 +44,15 @@ export class viewLogin extends UIBase {
 
 
     protected clickPopup() {
-        let msgBoxConfig = { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: false }
-        let box1 = {
-            ...msgBoxConfig, ...{
-                args: {
-                    title: "提示1",
-                    content: "1",
-                    left: { txt: "确定" },
-                    right: { txt: "取消" }
-                }
-            }
-        }
 
-        let box2 = {
-            ...msgBoxConfig, ...{
-                args:{
-                    title: "提示2",
-                    content: "2",
-                    left: { txt: "确定" },
-                    right: { txt: "取消" }
-                }
-            }
-        }
-        let box3 = {
-            ...msgBoxConfig, ...{
-               args:{
-                    title: "提示3",
-                    content: "3",
-                    left: { txt: "确定" },
-                    right: { txt: "取消" }
-               }
-            }
-        }
         XKit.popManager.addPopup({
-            uiConfig:box1,
+            uid: UID.MsgBox,
+            args: {
+                title: "提示1",
+                content: "1",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
             popCount: 1,
             onClosed: () => {
                 console.log("弹框1关闭了")
@@ -85,7 +60,13 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uiConfig: box2,
+            uid: UID.MsgBox,
+            args: {
+                title: "提示2",
+                content: "2",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
             popCount: 2,
             onClosed: () => {
                 console.log("弹框2关闭了")
@@ -93,7 +74,13 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uiConfig:box3,
+            uid: UID.MsgBox,
+            args: {
+                title: "提示3",
+                content: "3",
+                left: { txt: "确定" },
+                right: { txt: "取消" }
+            },
             popCount: 3,
             onClosed: () => {
                 console.log("弹框3关闭了")
