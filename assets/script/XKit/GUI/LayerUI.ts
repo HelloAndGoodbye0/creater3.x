@@ -1,7 +1,6 @@
 import { error, instantiate, Node, Prefab, resources } from "cc";
 import { UIConfig } from "./UIConfig";
 import { UIBase } from "./UIBase";
-import { UILayer } from "./UILayer";
 import { XKit } from "../XKit";
 
 
@@ -18,6 +17,13 @@ export class LayerUI extends Node {
     /**同一种类 UI 池的最大数量 */
     protected poolSize: number = 8
 
+    protected _queue: UIConfig[] = []; // 队列
+    /**
+     * 队列
+     */
+    get queue(): UIConfig[] {
+        return this._queue;
+    }
     constructor(name: string) {
         super(name);
     }
@@ -28,7 +34,7 @@ export class LayerUI extends Node {
         comp?.close(() => {
             this._uiMap.delete(path);
             //使用缓存池 || 不销毁 都放进池子里
-            if (comp._usePool || !bDestory) {
+            if (comp._config?.usePool || !bDestory) {
                 console.log(`recycleToPool: ${path}`);
                 this.recycleToPool(comp);
             }
@@ -102,6 +108,7 @@ export class LayerUI extends Node {
         // 7.显示刷新
         comp.show()
         comp.refresh(args)
+        console.log("33333333",comp)
         return comp as T;
     }
 
@@ -120,10 +127,7 @@ export class LayerUI extends Node {
      * @param config UI配置
      */
     protected _setupUIComponent(comp: UIBase, config: UIConfig): void {
-        comp._prefab = config.prefab;
-        comp._usePool = config.usePool;
-        comp._layer = config.layer;
-        comp._bAuto = config.bAuto || false;
+        comp._config = {...config}
         this._uiMap.set(config.prefab, comp);
         // 设置层级
         comp.node.setSiblingIndex(-1);
@@ -134,7 +138,8 @@ export class LayerUI extends Node {
      * @param comp 
      */
     protected recycleToPool(comp: UIBase) {
-        let key = comp._prefab.indexOf("_") > -1 ? comp._prefab.split("_")[0] : comp._prefab
+        let prefab = comp._config.prefab
+        let key = prefab.indexOf("_") > -1 ? prefab.split("_")[0] : prefab
         let arr = this.uiPool.get(key)
         if (!arr) {
             arr = []
@@ -182,5 +187,16 @@ export class LayerUI extends Node {
                 })
             }
         });
+    }
+
+
+    /**
+     * 清除所有界面
+     * @param isDestroy 是否销毁
+     */
+    clear(isDestroy:boolean = false){
+        this._uiMap.forEach((comp:UIBase)=>{
+            this.remove(comp._config,isDestroy,true)
+        })
     }
 }

@@ -1,11 +1,11 @@
 // scripts/framework/ui/UIManager.ts
-import { _decorator, Node, Prefab, resources, instantiate, Widget, error, } from 'cc';
+import { _decorator, Node, Widget } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
 import { baseUIConfig, UIConfig, UID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
-import { UIMsgBox, MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
+import { MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
 import { LayerUI } from './LayerUI';
 import { LayerPopup } from './LayerPopup';
 import { LayerDialog } from './LayerDialog';
@@ -110,12 +110,11 @@ export class LayerManager {
         }
         config.args = args
         config.bAuto = bAuto||false
-
         let  layerNode = this._layerMap.get(config?.layer || UILayer.UI); 
         if (!bAuto && (config.layer == UILayer.PopUp || config.layer == UILayer.Dialog)) {
             this.onNonAutoPopupOpened?.();
         }
-        return await layerNode.add(config)
+        return layerNode.add(config)
     }
 
     /**
@@ -133,14 +132,15 @@ export class LayerManager {
         }
         let  layerNode = this._layerMap.get(config?.layer || UILayer.UI);
         layerNode.remove(config,bDestory,bSkipAnim,(_com:UIBase)=>{
-            let layer = _com._layer;
-            let bAuto = _com._bAuto;
+            callback?.(_com)
+            let layer = _com._config.layer;
+            let bAuto = _com._config.bAuto;
             //手动弹框关闭后通知 弹框管理器继续？
-            if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog))
+            if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog) && layerNode.queue.length == 0)
             {
                 this.onNonAutoPopupClosed?.();
             }
-            callback?.(_com)
+            
         })
     }
 

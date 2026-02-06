@@ -94,9 +94,9 @@ export class PopupManager {
 
         // 2. 关闭当前正在显示的自动弹框
         // if (this.currentPopup) {
-            // 注意：关闭会触发 onClose 回调，我们在 onClose 里做了状态判断阻止继续执行
-            // this.gui.close(this.currentPopup._url);
-            // this.currentPopup = null;
+        //     // 注意：关闭会触发 onClose 回调，我们在 onClose 里做了状态判断阻止继续执行
+        //     this.gui.close(this.currentPopup._url);
+        //     this.currentPopup = null;
         // }
 
         // 3. 标记不再处理中
@@ -144,7 +144,7 @@ export class PopupManager {
      * 尝试处理队列中的下一个
      * 这是一个递归驱动的异步链
      */
-    private async tryProcessNext(bResume:boolean = false): Promise<void> {
+    private async tryProcessNext(bResume: boolean = false): Promise<void> {
         // 1. 基础拦截
         if (this.isPaused) return;
 
@@ -157,11 +157,13 @@ export class PopupManager {
         }
 
         // 3. 获取配置
+        XKit.log.logBusiness("tryProcessNext index:"+this.currentQueueIndex);
         const config = this.popupQueue[this.currentQueueIndex];
 
         // 4. 预检查：次数耗尽 (Skip)
         if ((config.popCount ?? 0) <= 0) {
             // 次数没了，直接跳下一个
+            XKit.log.logBusiness(config.uid, "PopCount <=0, tryProcessNext");
             this.currentQueueIndex++;
             this.tryProcessNext();
             return;
@@ -170,7 +172,7 @@ export class PopupManager {
         // 5. 预检查：条件不满足 (Skip)
         if (config.condition && !config.condition()) {
             // 条件不满足，跳下一个
-            XKit.log.logBusiness(config.uid, "Condition false, skipping");
+            XKit.log.logBusiness(config.uid, "Condition false, tryProcessNext");
             this.currentQueueIndex++;
             this.tryProcessNext();
             return;
@@ -195,7 +197,7 @@ export class PopupManager {
     /**
      * 处理一轮结束
      */
-    private handleRoundComplete(bResume:boolean): void {
+    private handleRoundComplete(bResume:boolean = false): void {
         // 过滤掉次数用完的 (可选优化，避免数组无限膨胀)
         this.popupQueue = this.popupQueue.filter(c => (c.popCount ?? 0) > 0);
 
@@ -206,15 +208,16 @@ export class PopupManager {
             return;
         }
 
-        // 进入轮询等待期
-        XKit.log.logBusiness(`Round complete. Waiting ${PopupManager.ROUND_INTERVAL}ms...`);
-        if(bResume) //恢复时，直接重置索引，开始新的一轮
+        if(bResume)
         {
+            XKit.log.logBusiness("Round complete. tryProcessNext ");
             this.currentQueueIndex = 0;
             this.tryProcessNext();
         }
-        else//延时
-        { 
+        else
+        {
+            // 进入轮询等待期
+            XKit.log.logBusiness(`Round complete. Waiting ${PopupManager.ROUND_INTERVAL}ms...`);
             this.clearTimer();
             this.timer = setTimeout(() => {
                 this.timer = null;
@@ -225,6 +228,7 @@ export class PopupManager {
                 }
             }, PopupManager.ROUND_INTERVAL);
         }
+
         
     }
 
@@ -233,14 +237,26 @@ export class PopupManager {
      */
     private async showPopup(config: IPopupConfig): Promise<boolean> {
         // 安全检查
-        if (this.currentPopup) return false;
-        if (this.isPaused) return false;
+        if (this.currentPopup){
+             XKit.log.logBusiness( "Current Popup is not null");
+             return false
+        };
+        if (this.isPaused)
+        {
+            XKit.log.logBusiness( "PopupManager is paused");
+            return false;
+        }
 
         try {
+            console.log("showPopup",config.uid,config.args);
             const popup = await this.gui.open<UIBase>(config.uid,config.args,true);
             // 再次检查（防止await期间被暂停）
-            if (!popup) return false;
+            if (!popup){
+                XKit.log.logBusiness( "Popup is null");
+                return true;
+            }
             if (this.isPaused) {
+                XKit.log.logBusiness( "popup  but PopupManager is paused");
                 this.gui.close(config.uid);
                 return false;
             }

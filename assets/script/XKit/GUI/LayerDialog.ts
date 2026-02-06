@@ -5,7 +5,7 @@ import { UIConfig } from "./UIConfig";
 
 export class LayerDialog extends LayerUI { 
     
-    protected _queue: UIConfig[] = []; // 队列
+
 
     protected _now: UIConfig =  null; // 当前
     async add<T extends UIBase>(data: UIConfig): Promise<T | null> {
@@ -23,9 +23,10 @@ export class LayerDialog extends LayerUI {
 
     remove(data: UIConfig, bDestory: boolean = false, bSkipAnim: boolean = false, callback?: (com: UIBase) => void) {
         super.remove(data, bDestory, bSkipAnim, (_com: UIBase)=>{
+            let hasDialog = this._queue.length > 0
             callback?.(_com)
             this._now = null
-            if(this._queue.length > 0)
+            if(hasDialog)
             {
                 let next = this._queue.shift();
                 this.add(next!);

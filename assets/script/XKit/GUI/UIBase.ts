@@ -3,7 +3,7 @@ import { _decorator, assetManager, Component, Enum, Animation } from 'cc';
 import { XKit } from '../XKit';
 import { EDITOR } from 'cc/env';
 import { utils } from '../utils/utils';
-import { UILayer } from './UILayer';
+import { UIConfig } from './UIConfig';
 const { ccclass, property } = _decorator;
 
 
@@ -104,15 +104,8 @@ export abstract class UIBase extends Component {
             })
         }
     }
-    /** 资源路径（由管理器赋值） */
-    public _prefab: string = "";
-    /** 是否使用对象池 */
-    public _usePool: boolean = false;
-    /** 属于哪个界面层 */
-    public _layer: UILayer = null;
-    /** 是否自动打开的 */
-    public _bAuto: boolean = false;
 
+    public _config: UIConfig = null
 
     /**
      * 页面刷新
