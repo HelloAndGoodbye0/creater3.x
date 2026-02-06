@@ -27,23 +27,24 @@ export class LayerUI extends Node {
     constructor(name: string) {
         super(name);
     }
-    remove(data: UIConfig, bDestory: boolean = false, bSkipAnim: boolean = false, callback?: (com: UIBase) => void) {
+    remove(data: UIConfig, bDestory: boolean = false, bSkipAnim: boolean = false, callback?: (com?: UIBase) => void) {
         let path = data.prefab
         let comp = this._uiMap.get(path);
         XKit.log.logBusiness(`close: ${path}`)
         comp?.close(() => {
             this._uiMap.delete(path);
+            callback?.(comp)
             //使用缓存池 || 不销毁 都放进池子里
             if (comp._config?.usePool || !bDestory) {
                  XKit.log.logBusiness(`recycleToPool: ${path}`);
                 this.recycleToPool(comp);
+                
             }
             else if (bDestory) {
                 XKit.log.logBusiness("销毁UI:"+path);
                 // 强制销毁
                 comp.node.destroy();
             }
-            callback?.(comp)
         }, bSkipAnim)
     }
 

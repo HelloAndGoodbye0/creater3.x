@@ -124,17 +124,17 @@ export class LayerManager {
      * @param callback 关闭完成回调，如有弹窗动画，则动画播放完成后回调
      * @param bSkipAnim 是否跳过关闭动画，直接关闭
      */
-    public close(ID:number,bDestory:boolean = false,bSkipAnim:boolean = false,callback?:(com:UIBase)=>void): void {
+    public close(ID:number,bDestory:boolean = false,bSkipAnim:boolean = false,callback?:(com?:UIBase)=>void): void {
         let config = this._uiConfig.get(ID)
         if(!config){
             XKit.log.logBusiness(`close ID:${ID} 未注册`);
             return
         }
         let  layerNode = this._layerMap.get(config?.layer || UILayer.UI);
-        layerNode.remove(config,bDestory,bSkipAnim,(_com:UIBase)=>{
+        layerNode.remove(config,bDestory,bSkipAnim,(_com?:UIBase)=>{
             callback?.(_com)
-            let layer = _com._config.layer;
-            let bAuto = _com._config.bAuto;
+            let layer = _com?._config.layer;
+            let bAuto = _com?._config.bAuto;
             //手动弹框关闭后通知 弹框管理器继续？
             if(!bAuto &&(layer == UILayer.PopUp || layer == UILayer.Dialog) && layerNode.queue.length == 0)
             {

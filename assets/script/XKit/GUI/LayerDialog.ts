@@ -24,13 +24,17 @@ export class LayerDialog extends LayerUI {
     remove(data: UIConfig, bDestory: boolean = false, bSkipAnim: boolean = false, callback?: (com: UIBase) => void) {
         super.remove(data, bDestory, bSkipAnim, (_com: UIBase)=>{
             let hasDialog = this._queue.length > 0
-            callback?.(_com)
             this._now = null
             if(hasDialog)
             {
                 let next = this._queue.shift();
                 this.add(next!);
             }
+            else
+            {
+                callback?.(_com)
+            }
+            
         });
     }
 }
