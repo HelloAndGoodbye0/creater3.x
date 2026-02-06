@@ -197,7 +197,7 @@ export class PopupManager {
     /**
      * 处理一轮结束
      */
-    private handleRoundComplete(bResume:boolean = false): void {
+    private handleRoundComplete(bResume: boolean = false): void {
         // 过滤掉次数用完的 (可选优化，避免数组无限膨胀)
         this.popupQueue = this.popupQueue.filter(c => (c.popCount ?? 0) > 0);
 
@@ -211,7 +211,10 @@ export class PopupManager {
         if(bResume)
         {
             XKit.log.logBusiness("Round complete. tryProcessNext ");
-            this.currentQueueIndex = 0;
+            // 在resume情况下，如果当前索引已经超出队列长度，需要重置为0
+            if (this.currentQueueIndex >= this.popupQueue.length) {
+                this.currentQueueIndex = 0;
+            }
             this.tryProcessNext();
         }
         else
@@ -248,12 +251,12 @@ export class PopupManager {
         }
 
         try {
-            console.log("showPopup",config.uid,config.args);
+            XKit.log.logBusiness( "showPopup uid:"+config.uid);
             const popup = await this.gui.open<UIBase>(config.uid,config.args,true);
             // 再次检查（防止await期间被暂停）
             if (!popup){
-                XKit.log.logBusiness( "Popup is null");
-                return true;
+                XKit.log.logBusiness( "Popup is null uid:"+config.uid);
+                return false;
             }
             if (this.isPaused) {
                 XKit.log.logBusiness( "popup  but PopupManager is paused");

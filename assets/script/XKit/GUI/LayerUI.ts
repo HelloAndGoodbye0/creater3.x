@@ -35,11 +35,11 @@ export class LayerUI extends Node {
             this._uiMap.delete(path);
             //使用缓存池 || 不销毁 都放进池子里
             if (comp._config?.usePool || !bDestory) {
-                console.log(`recycleToPool: ${path}`);
+                 XKit.log.logBusiness(`recycleToPool: ${path}`);
                 this.recycleToPool(comp);
             }
             else if (bDestory) {
-                console.log("销毁UI:", path);
+                XKit.log.logBusiness("销毁UI:"+path);
                 // 强制销毁
                 comp.node.destroy();
             }
@@ -108,7 +108,6 @@ export class LayerUI extends Node {
         // 7.显示刷新
         comp.show()
         comp.refresh(args)
-        console.log("33333333",comp)
         return comp as T;
     }
 
