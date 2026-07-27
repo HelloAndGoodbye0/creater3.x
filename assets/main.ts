@@ -17,17 +17,17 @@ declare global {
 export class main extends Component {
 
     async onLoad() {
-        // 第一步：检查热更新
+        // TODO 检查热更新
+
+
+        // 初始化Xkit的东西
         const persistRootNode = new Node("PersistRootNode");
         director.addPersistRootNode(persistRootNode);
-
         // 创建音频模块
         XKit.audio = persistRootNode.addComponent(AudioManager);
         XKit.audio.load();
-
         // 初始化 GUI
         XKit.gui = new LayerManager(this.node);
-
         // 弹框管理
         XKit.popManager = new PopupManager(XKit.gui);
 
