@@ -1,0 +1,13 @@
+#text {
+    color: var(--color-normal-contrast-weakest);
+    margin: auto;
+    width: 180px;
+}
+.counter {
+    text-align: center;
+}
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}

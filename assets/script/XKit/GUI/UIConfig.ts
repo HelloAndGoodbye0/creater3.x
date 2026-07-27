@@ -1,7 +1,14 @@
 import { UILayer } from "./UILayer";
-
-
-
+export enum BundleConfig {
+    /**
+     * 通用资源包
+     */
+    commonRes = "99",
+    /**
+     * lobby资源包
+     */
+    lobby = "100",
+}
  /**
   * 界面配置接口
   */
@@ -38,7 +45,7 @@ export enum UID {
 
 
 export var baseUIConfig: { [key: number]: UIConfig } = {
-    [UID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: "resources", usePool: true },
-    [UID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: "resources", usePool: false }
+    [UID.MsgBox]: { layer: UILayer.Dialog, prefab: "bundle/prefabs/alertNode", bundle: BundleConfig.commonRes, usePool: true },
+    [UID.Toast]: { layer: UILayer.Toast, prefab: "bundle/prefabs/notify", bundle: BundleConfig.commonRes, usePool: false }
 }
 

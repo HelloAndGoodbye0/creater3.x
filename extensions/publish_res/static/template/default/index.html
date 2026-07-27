@@ -1,0 +1,100 @@
+<!--
+ * @Author: Lee 497232807@qq.com
+ * @Date: 2023-08-03 08:47:41
+ * @LastEditors: Lee 497232807@qq.com
+ * @LastEditTime: 2023-08-04 11:41:28
+ * @FilePath: \cocos_framework_base\extensions\publish_res\static\template\default\index.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<div>
+    <div id="app">
+        <!-- <my-counter></my-counter> -->
+        <ui-label value="*****************************资源发布******************************"></ui-label>
+
+
+        <ui-label value="主包热更新根地址:"></ui-label>
+
+        <ui-input v-model="rootUrl" placeholder="请输入热更新根地址"></ui-input>
+
+        <div>
+            <ui-checkbox type="checkbox" v-model="incrementalUpdate"> <ui-label value="是否增量更新"></ui-label>
+            </ui-checkbox>
+            <ui-checkbox type="checkbox" v-model="generateZip"> <ui-label value="是否生成zip"></ui-label> </ui-checkbox>
+        </div>
+
+        <ui-label value="增量对应版本地址:"></ui-label>
+        <select v-model="incrementSelect">
+            <option v-for="(value, key) in incrementOption" :key="key" :value="key">
+                {{value}}
+        </select>
+
+        <ui-label value="*****************************customer*****************************"></ui-label>
+        <div>
+            
+            <div>
+                <ui-label value="customer是否参与热更新:"></ui-label>
+                <ui-checkbox type="checkbox"  v-model="customerJoinUpdate"> <ui-label :value="key"></ui-label> </ui-checkbox>
+            </div>
+            <div style="display: none;">
+                <ui-label value="customer热更新根地址:"></ui-label>
+                <ui-input v-model="customerUrl" placeholder="请输入customer热更新根地址"></ui-input>
+            </div>
+        </div>
+
+        
+
+        <ui-label value="*****************************选择发布语言清单**********************"></ui-label>
+        <div>
+            <div>
+                <ui-checkbox type="checkbox" @change=onSelectAllLan v-model="selectAllLan"> <ui-label value="选择所有语言"></ui-label>
+                </ui-checkbox>
+            </div>
+            <div>
+                <ui-label value="语言"></ui-label>
+            </div>
+            <span type="checkbox" v-for="(value, key) in publishLan" :key="key">
+                <ui-checkbox type="checkbox" v-model="publishLan[key]"> <ui-label :value="key"></ui-label> </ui-checkbox>
+            </span>
+        </div>
+        
+
+        <ui-label value="*****************************选择发布的平台**********************"></ui-label>
+        <div> 
+            <ui-select  value="android" @change="onPlatformChange($event.target.value)">
+                <option value="android">android</option>
+                <option value="ios">ios</option>
+                
+            </ui-select>
+        </div>
+
+        <ui-label value="*****************************发布游戏子游戏**********************"></ui-label>
+        <div>
+            <ui-checkbox type="checkbox" v-model="subGamePublish"> <ui-label value="游戏发布过滤"></ui-label> </ui-checkbox>
+            <ui-checkbox type="checkbox" @change=onSelectAll v-model="selectAll"> <ui-label value="选择所有子游戏"></ui-label>
+            </ui-checkbox>
+        </div>
+
+
+        <!-- 游戏列表 -->
+        <ui-label value="*****************************游戏列表******************************"></ui-label>
+        <div>
+
+            <span type="checkbox" v-for="(value, key) in subGames" :key="key">
+                <ui-checkbox type="checkbox" v-model="subGames[key]"> <ui-label :value="key"></ui-label> </ui-checkbox>
+            </span>
+        </div>
+
+        <!-- 发布按钮 -->
+        <div style="display: flex;gap: 10px;">
+            
+            <!-- <ui-button type="primary" @click="onBuild">构建</ui-button> -->
+            <ui-button type="primary" @click="onPublish">发布</ui-button>
+            <ui-button type="primary" @click="openPublishDir">打开发布目录</ui-button>
+        </div>
+ 
+
+
+    </div>
+
+
+</div>

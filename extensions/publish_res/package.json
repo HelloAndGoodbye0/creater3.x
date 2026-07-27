@@ -1,0 +1,64 @@
+{
+    "package_version": 2,
+    "version": "1.0.0",
+    "name": "publish_res",
+    "description": "i18n:publish_res.description",
+    "main": "./dist/main.js",
+    "dependencies": {
+        "adm-zip": "^0.5.10",
+        "fs-extra": "^10.0.0",
+        "vue": "^3.1.4"
+    },
+    "devDependencies": {
+        "@types/adm-zip": "^0.5.0",
+        "@types/fs-extra": "^9.0.5",
+        "@types/node": "^16.0.1",
+        "typescript": "^4.3.4"
+    },
+    "panels": {
+        "default": {
+            "title": "publish_res Default Panel",
+            "type": "dockable",
+            "main": "dist/panels/default",
+            "save": true,
+            "size": {
+                "min-width": 400,
+                "min-height": 300,
+                "width": 1000,
+                "height": 900
+            }
+        }
+    },
+    "contributions": {
+        "menu": [
+            {
+                "path": "发布资源",
+                "label": "一键发布",
+                "message": "open-panel"
+            }
+        ],
+        "messages": {
+            "open-panel": {
+                "methods": [
+                    "openPanel"
+                ]
+            },
+            "send-to-panel": {
+                "methods": [
+                    "default.hello"
+                ]
+            },
+            "log": {
+                "methods": [
+                    "log"
+                ]
+            }
+        }
+    },
+    "author": "lee",
+    "editor": ">=3.7.0",
+    "scripts": {
+        "build": "tsc -b",
+        "watch": "tsc -w"
+    }
+}

@@ -1,0 +1,49 @@
+#tip {
+  text-align: center;
+  margin: 15px 15px;
+}
+
+#container{
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.item {
+  /* border: 3px solid green; */
+  border-left:  10px solid #53A6FFA3;
+  border-radius: 5px;
+  background-color: black;
+  margin: 15px 15px;
+  padding: 15px
+
+}
+
+.item-miss {
+  /* border: 3px solid green; */
+  border-left:  10px solid red;
+  border-radius: 5px;
+  background-color: #2E0906;
+  margin: 15px 15px;
+  padding: 15px
+
+}
+
+.asset{
+  width: 400px;
+  margin: 15px 15px 0px 15px;
+  font-size: 15px;
+}
+
+node{
+  font-size: 15px;
+  color: #8AB8FF;
+  margin-left: 30px;
+
+}
+
+com{
+  font-size: 14px;
+  color: #4E94FF;
+  margin-left: 60px;
+}

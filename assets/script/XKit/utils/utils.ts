@@ -3,6 +3,7 @@ import { SpriteFrame,view,sys,Size,ResolutionPolicy,macro,native,__private,Compo
 import { Texture2D,EventTouch,Quat,assetManager } from "cc";
 import { DEBUG, HTML5, NATIVE } from "cc/env";
 import { XKit } from '../XKit';
+import { BundleConfig } from '../GUI/UIConfig';
 
 
 /**
@@ -257,10 +258,10 @@ export class utils {
      * @param soundUrl 音频
      * @param bundleName bundleName
      */
-    public static ButtonBindClick(btn: Button, clickCall: Function, target?: any, soundUrl?: string, bundleName: string="resources", bClear:boolean = true): void {
+    public static ButtonBindClick(btn: Button, clickCall: Function, target?: any, soundUrl?: string, bundleName: string=BundleConfig.commonRes, bClear:boolean = true): void {
         if (btn) {
             if (this.StringIsNullOrEmpty(soundUrl)) {
-                soundUrl = 'content/audio/button'
+                soundUrl = 'bundle/audio/audio_ui_btn_01'
             }
 
             if(bClear)
