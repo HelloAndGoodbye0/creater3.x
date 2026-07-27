@@ -39,13 +39,19 @@ export enum UID {
     /**
      * 浮动文字
      */
-    Toast,
+    Toast = 1,
+
+    /**登录 */
+    Login = 1000,
+    /**大厅 */
+    Lobby = 1001,
 
 }
 
 
-export var baseUIConfig: { [key: number]: UIConfig } = {
+export var GameUIConfig: { [key: number]: UIConfig } = {
     [UID.MsgBox]: { layer: UILayer.Dialog, prefab: "bundle/prefabs/alertNode", bundle: BundleConfig.commonRes, usePool: true },
-    [UID.Toast]: { layer: UILayer.Toast, prefab: "bundle/prefabs/notify", bundle: BundleConfig.commonRes, usePool: false }
+    [UID.Toast]: { layer: UILayer.Toast, prefab: "bundle/prefabs/notify", bundle: BundleConfig.commonRes, usePool: false },
+    [UID.Login]: { layer: UILayer.UI, prefab: "prefabs/login", bundle: BundleConfig.lobby.toString()},
+    [UID.Lobby]: { layer: UILayer.UI, prefab: "prefabs/lobby", bundle: BundleConfig.lobby.toString()}
 }
-

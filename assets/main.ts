@@ -18,7 +18,6 @@ export class main extends Component {
 
     async onLoad() {
         // 第一步：检查热更新
-
         const persistRootNode = new Node("PersistRootNode");
         director.addPersistRootNode(persistRootNode);
 

@@ -2,7 +2,7 @@
 import { _decorator, Node, Widget } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
-import { baseUIConfig, UIConfig, UID } from './UIConfig';
+import { GameUIConfig, UIConfig, UID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
 import { MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
@@ -87,8 +87,8 @@ export class LayerManager {
         }
 
         //注册基础UI
-        for (const key in baseUIConfig) {
-            const config = baseUIConfig[key];
+        for (const key in GameUIConfig) {
+            const config = GameUIConfig[key];
             this.reigster(Number(key), config);
         }
 
