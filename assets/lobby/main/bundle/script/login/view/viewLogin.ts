@@ -108,7 +108,6 @@ export class viewLogin extends UIBase {
         }
         XKit.gui.showMsgBox(data)
 
-        XKit.gui.showMsgBox(data)
     }
 
     eventTest(data) {
