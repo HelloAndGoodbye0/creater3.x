@@ -261,7 +261,7 @@ export class utils {
     public static ButtonBindClick(btn: Button, clickCall: Function, target?: any, soundUrl?: string, bundleName: string=BundleConfig.commonRes, bClear:boolean = true): void {
         if (btn) {
             if (this.StringIsNullOrEmpty(soundUrl)) {
-                soundUrl = 'bundle/audio/audio_ui_btn_01'
+                soundUrl = 'audio/audio_ui_btn_01'
             }
 
             if(bClear)

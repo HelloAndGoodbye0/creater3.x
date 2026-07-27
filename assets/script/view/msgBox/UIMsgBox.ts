@@ -2,7 +2,7 @@ import { XKit } from "../../../script/XKit/XKit";
 import { UIBase } from "../../../script/XKit/GUI/UIBase"
 import { utils } from "../../../script/XKit/utils/utils";
 import { _decorator, Label, Button } from 'cc';
-import { UID } from "../../../script/XKit/GUI/UIConfig";
+import { BaseUID } from "../../../script/XKit/GUI/UIConfig";
 const { ccclass, property } = _decorator;
 
 
@@ -91,7 +91,7 @@ export class UIMsgBox extends UIBase {
         //清空点击委托
         this.leftClickHandler = null
         this.rightClickHandler = null
-        XKit.gui.close( UID.MsgBox )
+        XKit.gui.close( BaseUID.MsgBox )
     }
 
     protected onClose(): void {

@@ -46,7 +46,7 @@ export enum BaseUID {
 
 
 export var BaseGameUIConfig: { [key: number]: UIConfig } = {
-    [BaseUID.MsgBox]: { layer: UILayer.Dialog, prefab: "bundle/prefabs/alertNode", bundle: BundleConfig.commonRes, usePool: true },
-    [BaseUID.Toast]: { layer: UILayer.Toast, prefab: "bundle/prefabs/notify", bundle: BundleConfig.commonRes, usePool: false },
+    [BaseUID.MsgBox]: { layer: UILayer.Dialog, prefab: "prefabs/alertNode", bundle: BundleConfig.commonRes, usePool: true },
+    [BaseUID.Toast]: { layer: UILayer.Toast, prefab: "prefabs/notify", bundle: BundleConfig.commonRes, usePool: false },
   
 }
