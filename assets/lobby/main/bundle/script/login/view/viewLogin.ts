@@ -6,7 +6,7 @@ import { utils } from '../../../../../../script/XKit/utils/utils';
 import { XKit } from '../../../../../../script/XKit/XKit';
 import { tutorial } from 'pb_framework';
 import { ConstEventDefine } from '../../config/ConstEventDefine';
-import { UID } from '../../../../../../script/XKit/GUI/UIConfig';
+import { BaseUID } from '../../../../../../script/XKit/GUI/UIConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('viewLogin')
@@ -46,7 +46,7 @@ export class viewLogin extends UIBase {
     protected clickPopup() {
 
         XKit.popManager.addPopup({
-            uid: UID.MsgBox,
+            uid: BaseUID.MsgBox,
             args: {
                 title: "提示1",
                 content: "1",
@@ -60,7 +60,7 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uid: UID.MsgBox,
+            uid: BaseUID.MsgBox,
             args: {
                 title: "提示2",
                 content: "2",
@@ -74,7 +74,7 @@ export class viewLogin extends UIBase {
         })
 
         XKit.popManager.addPopup({
-            uid: UID.MsgBox,
+            uid: BaseUID.MsgBox,
             args: {
                 title: "提示3",
                 content: "3",

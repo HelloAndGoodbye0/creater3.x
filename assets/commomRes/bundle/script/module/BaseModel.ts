@@ -1,5 +1,5 @@
 
-import { XKit } from "../XKit"
+import { XKit } from "../../../../script/XKit/XKit"
 
 
 export enum HttpType {
@@ -9,8 +9,7 @@ export enum HttpType {
 
 /**
  * 模块基类
- * 初始化
- * init()
+    public static ID: PModuleID = PModuleID.LOBBY;、/
  *      onInit()
  *      addEventListener()
  * 释放
@@ -20,7 +19,7 @@ export enum HttpType {
  *      
  * 
  */
-export abstract class baseModule {
+export abstract class BaseModule {
 
     /**
      * 初始化模块

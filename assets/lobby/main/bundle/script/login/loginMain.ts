@@ -4,7 +4,7 @@ import { lobbyModHub } from '../mod/lobbyModHub';
 import { PModuleID } from '../PModuleID';
 import { XKit } from '../../../../../script/XKit/XKit';
 import { viewLogin } from './view/viewLogin';
-import { GameUIConfig, UID } from '../../../../../script/XKit/GUI/UIConfig';
+import { UID ,GameUIConfig} from '../config/GameUIConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('loginMian')

@@ -3,7 +3,8 @@ import { lobbyMod } from '../mod/lobbyMod';
 import { XKit } from '../../../../../script/XKit/XKit';
 import { lobbyModHub } from '../mod/lobbyModHub';
 import { PModuleID } from '../PModuleID';
-import { UID } from '../../../../../script/XKit/GUI/UIConfig';
+import { UID } from '../config/GameUIConfig';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('lobbyMain')

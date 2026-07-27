@@ -1,14 +1,13 @@
-import { baseModule, HttpType } from '../../../../../script/XKit/module/baseModel';
 import { _decorator, Component, Node } from 'cc';
 import { PModuleID } from '../PModuleID';
 import { HttpReturn } from '../../../../../script/XKit/http/HttpRequest';
 import { XKit } from '../../../../../script/XKit/XKit';
 import { UIWaiting } from '../../../../../script/view/wait/UIWaiting';
-import { UILayer } from '../../../../../script/XKit/GUI/UILayer';
+import { BaseModule, HttpType } from '../../../../../commomRes/bundle/script/module/BaseModel';
 const { ccclass, property } = _decorator;
 
 @ccclass('lobbyMod')
-export class lobbyMod extends baseModule {
+export class lobbyMod extends BaseModule {
 
     
     public static ID:PModuleID;

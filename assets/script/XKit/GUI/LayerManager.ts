@@ -2,7 +2,7 @@
 import { _decorator, Node, Widget } from 'cc';
 import { UIBase } from './UIBase';
 import { UILayer } from './UILayer';
-import { GameUIConfig, UIConfig, UID } from './UIConfig';
+import { BaseGameUIConfig, UIConfig, BaseUID } from './UIConfig';
 import { XKit } from '../XKit';
 import { UIToast } from '../../../script/view/toast/UIToast';
 import { MsgBoxData } from '../../../script/view/msgBox/UIMsgBox';
@@ -87,8 +87,8 @@ export class LayerManager {
         }
 
         //注册基础UI
-        for (const key in GameUIConfig) {
-            const config = GameUIConfig[key];
+        for (const key in BaseGameUIConfig) {
+            const config = BaseGameUIConfig[key];
             this.reigster(Number(key), config);
         }
 
@@ -152,7 +152,7 @@ export class LayerManager {
      * @param right 
      */
     async showMsgBox(data: MsgBoxData) {
-        this.open<UIToast>(UID.MsgBox, data)
+        this.open<UIToast>(BaseUID.MsgBox, data)
 
     }
 
@@ -163,7 +163,7 @@ export class LayerManager {
      * @param useI18n 是否使用多语言
      */
     async toast(content: string) {
-        this.open<UIToast>(UID.Toast, content)
+        this.open<UIToast>(BaseUID.Toast, content)
     }
 
 
